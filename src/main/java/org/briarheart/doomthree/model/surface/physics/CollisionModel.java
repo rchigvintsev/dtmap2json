@@ -46,36 +46,58 @@ public class CollisionModel {
     }
 
     private Map<Long, Set<Face>> groupCoplanarFaces(Surface surface) {
-        Map<Long, Set<Face>> groups = new HashMap<>();
+        Map<Long, Set<Face>> result = new HashMap<>();
+        Map<Long, Boolean> visited = new HashMap<>();
 
-        for (int i = 0; i < surface.getFaces().length; i++) {
-            Face face = surface.getFaces()[i];
+        for (Face face : surface.getFaces()) {
+            if (visited.getOrDefault(face.getId(), false))
+                continue;
+            Deque<Face> path = new LinkedList<>();
 
-            Set<Face> group = groups.computeIfAbsent(face.getGroupId(), key -> new HashSet<>());
-            group.add(face);
+            while (face != null) {
+                visited.put(face.getId(), true);
+                boolean found = false;
+                for (Face otherFace : surface.getFaces()) {
+                    if (face == otherFace || visited.getOrDefault(otherFace.getId(), false))
+                        continue;
 
-            int adjacentFacesCounter = 0;
-            for (int j = 0; j < surface.getFaces().length; j++) {
-                Face otherFace = surface.getFaces()[j];
-                if (face.getGroupId() == otherFace.getGroupId())
-                    continue;
+                    if (face.hasCommonEdge(otherFace) && face.isCoplanar(otherFace)) {
+                        Set<Face> faceGroup = result.get(face.getGroupId());
+                        Set<Face> otherFaceGroup = result.get(otherFace.getGroupId());
 
-                if (face.hasCommonEdge(otherFace) && face.isCoplanar(otherFace)) {
-                    Long otherGroupId = otherFace.getGroupId();
-                    Set<Face> otherGroup = groups.computeIfAbsent(otherGroupId, key -> new HashSet<>());
-                    otherGroup.add(otherFace);
-                    for (Face f : otherGroup) {
-                        f.setGroupId(face.getGroupId());
-                        group.add(f);
+                        if (faceGroup == null && otherFaceGroup == null) {
+                            faceGroup = new HashSet<>();
+                            faceGroup.add(face);
+                            faceGroup.add(otherFace);
+                            result.put(face.getGroupId(), faceGroup);
+                            otherFace.setGroupId(face.getGroupId());
+                        } else {
+                            if (faceGroup == null) {
+                                otherFaceGroup.add(face);
+                                face.setGroupId(otherFace.getGroupId());
+                            } else if (otherFaceGroup == null) {
+                                faceGroup.add(otherFace);
+                                otherFace.setGroupId(face.getGroupId());
+                            } else {
+                                faceGroup.addAll(otherFaceGroup);
+                                result.remove(otherFace.getGroupId());
+                                for (Face f : otherFaceGroup)
+                                    f.setGroupId(face.getGroupId());
+                            }
+                        }
+
+                        path.push(face);
+                        face = otherFace;
+                        found = true;
+                        break;
                     }
-                    groups.remove(otherGroupId);
-                    adjacentFacesCounter++;
                 }
-                if (adjacentFacesCounter == 3)
-                    break;
+
+                if (!found)
+                    face = path.poll();
             }
         }
-        return groups;
+        return result;
     }
 
     private Vector3 getNormal(Set<Face> faces) {
