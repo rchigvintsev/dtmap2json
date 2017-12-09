@@ -18,9 +18,14 @@ public class Vector3 {
         this.z = z;
     }
 
+    public Vector3(Vector2 other) {
+        this(other.x, other.y, 0.0);
+    }
+
     public Vector3(Vector3 other) {
         this(other.x, other.y, other.z);
     }
+
 
     public static Vector3 fromString(String s) {
         String[] split = s.split(" ");
@@ -148,5 +153,27 @@ public class Vector3 {
                 (e[1] * x + e[5] * y + e[9] * z + e[13]) * w,
                 (e[2] * x + e[6] * y + e[10] * z + e[14]) * w
         );
+    }
+
+    public double distanceTo(Vector3 v) {
+        return Math.sqrt(distanceToSquared(v));
+    }
+
+    public double distanceToSquared(Vector3 v) {
+        double dx = x - v.x, dy = y - v.y, dz = z - v.z;
+        return dx * dx + dy * dy + dz * dz;
+    }
+
+    public Vector2 toVector2() {
+        return new Vector2(x, y);
+    }
+
+    public Vector3 worldToLocal(Matrix4 worldMatrix) {
+        Matrix4 m1 = new Matrix4();
+        return applyMatrix4(m1.getInverse(worldMatrix));
+    }
+
+    public Vector3 localToWorld(Matrix4 worldMatrix) {
+        return applyMatrix4(worldMatrix);
     }
 }

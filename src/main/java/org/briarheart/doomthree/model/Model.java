@@ -116,7 +116,7 @@ public class Model {
                 String line = scanner.nextLine().trim();
                 surfaceBody.append("\n").append(line);
                 if (line.equals("}"))
-                    return new Surface(surfaceBody.toString());
+                    return new Surface(this, surfaceBody.toString());
             }
             System.err.println("Unexpected end of model body");
         } else

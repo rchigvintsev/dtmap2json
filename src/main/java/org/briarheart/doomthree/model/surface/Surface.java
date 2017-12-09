@@ -2,6 +2,7 @@ package org.briarheart.doomthree.model.surface;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.briarheart.doomthree.model.Model;
 import org.briarheart.doomthree.model.surface.material.Materials;
 import org.briarheart.doomthree.model.surface.physics.CollisionModel;
 import org.briarheart.doomthree.util.BoundingBox;
@@ -23,6 +24,8 @@ public class Surface {
     private static final Pattern HEADER_PATTERN = Pattern
             .compile("/\\* (surface \\d+) \\*/ \\{ \"([\\w/_]+)\" /\\* numVerts = \\*/ (\\d+)");
 
+    private final Model model;
+
     private String name;
     private String materialName;
     private int numberOfVertices;
@@ -31,8 +34,13 @@ public class Surface {
     private CollisionModel collisionModel;
     private BoundingBox boundingBox = new BoundingBox();
 
-    public Surface(String surfaceBody) {
+    public Surface(Model model, String surfaceBody) {
+        this.model = model;
         parse(surfaceBody);
+    }
+
+    public Model getModel() {
+        return model;
     }
 
     public String getName() {

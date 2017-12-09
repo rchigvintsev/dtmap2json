@@ -1,9 +1,13 @@
 package org.briarheart.doomthree.util;
 
+import org.apache.commons.math3.util.Precision;
+
 /**
  * @author Roman Chigvintsev
  */
 public class Quaternion {
+    private static final double ERROR = 0.00001;
+
     private double _w;
     private double _x;
     private double _y;
@@ -71,5 +75,33 @@ public class Quaternion {
     @Override
     public String toString() {
         return toJson();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Quaternion that = (Quaternion) o;
+
+        if (!Precision.equals(that._w, _w, ERROR)) return false;
+        if (!Precision.equals(that._x, _x, ERROR)) return false;
+        if (!Precision.equals(that._y, _y, ERROR)) return false;
+        return Precision.equals(that._z, _z, ERROR);
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        temp = Double.doubleToLongBits(_w);
+        result = (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(_x);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(_y);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(_z);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
     }
 }

@@ -13,6 +13,10 @@ import java.util.*;
  * @author Roman Chigvintsev
  */
 public class CollisionModel {
+    private static final double AREA_DELTA_THRESHOLD = 1000.0;
+    private static final double AREA_THRESHOLD = 100.0;
+    private static final double BOX_BODY_THICKNESS = 10.0;
+
     private List<BoxBody> bodies = new ArrayList<>();
 
     public CollisionModel(Surface surface) {
@@ -20,11 +24,29 @@ public class CollisionModel {
         for (Long groupId : coplanarFaces.keySet()) {
             Set<Face> faces = coplanarFaces.get(groupId);
             if (faces.size() > 1) {
-                Vector3 normal = getNormal(faces);
-                Vector3 position = computePosition(faces, normal, surface);
-                Quaternion quaternion = computeQuaternion(position, normal);
-                Vector3 size = computeSize(faces, position, quaternion, surface);
-                bodies.add(new BoxBody(size, position, quaternion));
+                double realArea = computeArea(faces, surface);
+                if (realArea > AREA_THRESHOLD) {
+                    Vector3 normal = getNormal(faces);
+
+                    Vector3 position = computePosition(faces, normal, surface);
+                    Quaternion quaternion = computeQuaternion(position, normal);
+                    Vector3 size = computeSize(faces, position, quaternion, surface);
+
+                    double bodyArea = size.x * size.y;
+                    double areaDelta = bodyArea - realArea;
+
+                    if (Math.abs(areaDelta) > AREA_DELTA_THRESHOLD) {
+                        if (areaDelta < 0)
+                            System.err.println("Part of surface \"" + surface.getName() + "\" of model \""
+                                    + surface.getModel().getName() + "\" has area much larger than area of "
+                                    + "physical body");
+                        else {
+                            SurfaceSplitter splitter = new SurfaceSplitter(surface, AREA_THRESHOLD, BOX_BODY_THICKNESS);
+                            bodies.addAll(splitter.split(faces, position, quaternion, size));
+                        }
+                    } else
+                        bodies.add(new BoxBody(size, position, quaternion));
+                }
             }
         }
     }
@@ -130,19 +152,20 @@ public class CollisionModel {
 
         BoundingBox boundingBox = new BoundingBox();
         for (Face face : faces) {
-            boundingBox.checkBoundaries(worldToLocal(surface.getVertices()[face.a].position, worldMatrix));
-            boundingBox.checkBoundaries(worldToLocal(surface.getVertices()[face.b].position, worldMatrix));
-            boundingBox.checkBoundaries(worldToLocal(surface.getVertices()[face.c].position, worldMatrix));
+            boundingBox.checkBoundaries(surface.getVertices()[face.a].position.worldToLocal(worldMatrix));
+            boundingBox.checkBoundaries(surface.getVertices()[face.b].position.worldToLocal(worldMatrix));
+            boundingBox.checkBoundaries(surface.getVertices()[face.c].position.worldToLocal(worldMatrix));
         }
 
         double width = boundingBox.getWidth();
         double height = boundingBox.getHeight();
-        double depth = 10.0;
-        return new Vector3(width, height, depth);
+        return new Vector3(width, height, BOX_BODY_THICKNESS);
     }
 
-    private Vector3 worldToLocal(Vector3 v, Matrix4 matrixWorld) {
-        Matrix4 m1 = new Matrix4();
-        return v.applyMatrix4(m1.getInverse(matrixWorld));
+    private double computeArea(Set<Face> faces, Surface surface) {
+        double result = 0;
+        for (Face face : faces)
+            result += face.getArea(surface);
+        return result;
     }
 }

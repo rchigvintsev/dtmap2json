@@ -1,9 +1,15 @@
 package org.briarheart.doomthree.util;
 
+import org.apache.commons.math3.util.Precision;
+
+import java.util.Arrays;
+
 /**
  * @author Roman Chigvintsev
  */
 public class Matrix4 {
+    private static final double ERROR = 0.00001;
+
     double[] elements = {
             1, 0, 0, 0,
             0, 1, 0, 0,
@@ -187,5 +193,26 @@ public class Matrix4 {
         te[12] = v.x;
         te[13] = v.y;
         te[14] = v.z;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Matrix4 matrix4 = (Matrix4) o;
+
+        for (int i = 0; i < elements.length; i++) {
+            double element = elements[i];
+            double otherElement = matrix4.elements[i];
+            if (!Precision.equals(element, otherElement, ERROR))
+                return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(elements);
     }
 }
