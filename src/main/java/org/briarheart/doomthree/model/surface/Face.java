@@ -5,6 +5,9 @@ import org.briarheart.doomthree.util.Matrix4;
 import org.briarheart.doomthree.util.Vector2;
 import org.briarheart.doomthree.util.Vector3;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Roman Chigvintsev
  */
@@ -17,6 +20,8 @@ public class Face implements Identifiable {
     public final int c;
     public Vector3 normal;
     private long groupId;
+
+    private Map<Matrix4, Vector3[]> localPointCache = new HashMap<>();
 
     public Face(long id, int[] a, Vector3 normal) {
         this(id, a[0], a[1], a[2], normal);
@@ -61,15 +66,19 @@ public class Face implements Identifiable {
     }
 
     public boolean containsPoint(Vector2 point, Matrix4 worldMatrix, Surface surface) {
-        // TODO: закэшировать вычисленные локальные точки
-        Vector3 a = surface.getVertices()[this.a].position.worldToLocal(worldMatrix);
-        Vector3 b = surface.getVertices()[this.b].position.worldToLocal(worldMatrix);
-        Vector3 c = surface.getVertices()[this.c].position.worldToLocal(worldMatrix);
+        Vector3[] abc = localPointCache.computeIfAbsent(worldMatrix, key -> new Vector3[] {
+                surface.getVertices()[a].position.worldToLocal(worldMatrix),
+                surface.getVertices()[b].position.worldToLocal(worldMatrix),
+                surface.getVertices()[c].position.worldToLocal(worldMatrix)
+        });
 
-        double denominator = ((b.y - c.y) * (a.x - c.x) + (c.x - b.x) * (a.y - c.y));
+        double denominator = ((abc[1].y - abc[2].y) * (abc[0].x - abc[2].x) + (abc[2].x - abc[1].x)
+                * (abc[0].y - abc[2].y));
 
-        double x = ((b.y - c.y) * (point.x - c.x) + (c.x - b.x) * (point.y - c.y)) / denominator;
-        double y = ((c.y - a.y) * (point.x - c.x) + (a.x - c.x) * (point.y - c.y)) / denominator;
+        double x = ((abc[1].y - abc[2].y) * (point.x - abc[2].x) + (abc[2].x - abc[1].x) * (point.y - abc[2].y))
+                / denominator;
+        double y = ((abc[2].y - abc[0].y) * (point.x - abc[2].x) + (abc[0].x - abc[2].x) * (point.y - abc[2].y))
+                / denominator;
         double z = 1.0 - x - y;
 
         return (0 - EPSILON <= x && x <= 1 + EPSILON)
