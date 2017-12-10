@@ -32,7 +32,7 @@ public class Rectangle {
 
     public Rectangle[] split(double areaThreshold) {
         if (width * height < areaThreshold)
-            return new Rectangle[0];
+            return null;
 
         Rectangle[] result = new Rectangle[4];
 
@@ -59,6 +59,29 @@ public class Rectangle {
         }
 
         return result;
+    }
+
+    public Rectangle expand(ExpansionDirection direction) {
+        switch (direction) {
+            case UP: {
+                Vector2 position = new Vector2(this.position.x, this.position.y + height / 2);
+                return new Rectangle(width, height * 2, position);
+            }
+            case DOWN: {
+                Vector2 position = new Vector2(this.position.x, this.position.y - height / 2);
+                return new Rectangle(width, height * 2, position);
+            }
+            case RIGHT: {
+                Vector2 position = new Vector2(this.position.x + width / 2, this.position.y);
+                return new Rectangle(width * 2, height, position);
+            }
+            case LEFT: {
+                Vector2 position = new Vector2(this.position.x - width / 2, this.position.y);
+                return new Rectangle(width * 2, height, position);
+            }
+            default:
+                throw new RuntimeException("It was not supposed to happen!");
+        }
     }
 
     public double getWidth() {
@@ -88,4 +111,6 @@ public class Rectangle {
     public Vector2 getBottomRight() {
         return bottomRight;
     }
+
+    public enum ExpansionDirection {UP, DOWN, RIGHT, LEFT}
 }
