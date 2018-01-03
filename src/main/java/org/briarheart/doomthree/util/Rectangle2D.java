@@ -3,7 +3,7 @@ package org.briarheart.doomthree.util;
 /**
  * @author Roman Chigvintsev
  */
-public class Rectangle {
+public class Rectangle2D {
     private final double width;
     private final double height;
     private final Vector2 position;
@@ -12,11 +12,11 @@ public class Rectangle {
     private final Vector2 upperRight;
     private final Vector2 bottomRight;
 
-    public Rectangle(Vector2 size, Vector2 position) {
+    public Rectangle2D(Vector2 size, Vector2 position) {
         this(size.x, size.y, position);
     }
 
-    public Rectangle(double width, double height, Vector2 position) {
+    public Rectangle2D(double width, double height, Vector2 position) {
         this.width = width;
         this.height = height;
         this.position = position;
@@ -30,11 +30,11 @@ public class Rectangle {
         this.bottomRight = new Vector2(position.x + halfWidth, position.y - halfHeight);
     }
 
-    public Rectangle[] split(double areaThreshold) {
+    public Rectangle2D[] split(double areaThreshold) {
         if (width * height < areaThreshold)
             return null;
 
-        Rectangle[] result = new Rectangle[4];
+        Rectangle2D[] result = new Rectangle2D[4];
 
         double halfWidth = width / 2;
         double halfHeight = height / 2;
@@ -55,33 +55,38 @@ public class Rectangle {
                     position = new Vector2(this.position.x + halfWidth / 2, this.position.y - halfHeight / 2);
                     break;
             }
-            result[i] = new Rectangle(halfWidth, halfHeight, position);
+            result[i] = new Rectangle2D(halfWidth, halfHeight, position);
         }
 
         return result;
     }
 
-    public Rectangle expand(ExpansionDirection direction) {
-        switch (direction) {
-            case UP: {
-                Vector2 position = new Vector2(this.position.x, this.position.y + height / 2);
-                return new Rectangle(width, height * 2, position);
-            }
-            case DOWN: {
-                Vector2 position = new Vector2(this.position.x, this.position.y - height / 2);
-                return new Rectangle(width, height * 2, position);
-            }
-            case RIGHT: {
-                Vector2 position = new Vector2(this.position.x + width / 2, this.position.y);
-                return new Rectangle(width * 2, height, position);
-            }
-            case LEFT: {
-                Vector2 position = new Vector2(this.position.x - width / 2, this.position.y);
-                return new Rectangle(width * 2, height, position);
-            }
-            default:
-                throw new RuntimeException("It was not supposed to happen!");
+    public Rectangle2D merge(Rectangle2D other) {
+        if (this.upperLeft.equals(other.bottomLeft) && this.upperRight.equals(other.bottomRight)) {
+            // Merge upwards
+            Vector2 position = new Vector2(this.position.x, this.position.y + other.height / 2);
+            return new Rectangle2D(width, height + other.height, position);
         }
+
+        if (this.bottomLeft.equals(other.upperLeft) && this.bottomRight.equals(other.upperRight)) {
+            // Merge downwards
+            Vector2 position = new Vector2(this.position.x, this.position.y - other.height / 2);
+            return new Rectangle2D(width, height + other.height, position);
+        }
+
+        if (this.upperRight.equals(other.upperLeft) && this.bottomRight.equals(other.bottomLeft)) {
+            // Merge to the right
+            Vector2 position = new Vector2(this.position.x + other.width / 2, this.position.y);
+            return new Rectangle2D(width + other.width, height, position);
+        }
+
+        if (this.upperLeft.equals(other.upperRight) && this.bottomLeft.equals(other.bottomRight)) {
+            // Merge to the left
+            Vector2 position = new Vector2(this.position.x - other.width / 2, this.position.y);
+            return new Rectangle2D(width + other.width, height, position);
+        }
+
+        throw new IllegalArgumentException("Rectangles cannot be merged");
     }
 
     public double getWidth() {
@@ -111,6 +116,4 @@ public class Rectangle {
     public Vector2 getBottomRight() {
         return bottomRight;
     }
-
-    public enum ExpansionDirection {UP, DOWN, RIGHT, LEFT}
 }
