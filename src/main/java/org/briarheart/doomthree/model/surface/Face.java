@@ -49,7 +49,7 @@ public class Face implements Identifiable {
         this.groupId = groupId;
     }
 
-    public boolean hasCommonEdge(Face other) {
+    public boolean hasCommonEdgeWith(Face other) {
         int commonVerticesNumber = 0;
         if (other.containsVertex(a)) commonVerticesNumber++;
         if (other.containsVertex(b)) commonVerticesNumber++;

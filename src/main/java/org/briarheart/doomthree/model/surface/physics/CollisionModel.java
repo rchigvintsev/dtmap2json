@@ -83,7 +83,7 @@ public class CollisionModel {
                     if (face == otherFace || visited.getOrDefault(otherFace.getId(), false))
                         continue;
 
-                    if (face.hasCommonEdge(otherFace) && face.isCoplanar(otherFace)) {
+                    if (face.hasCommonEdgeWith(otherFace) && face.isCoplanar(otherFace)) {
                         Set<Face> faceGroup = result.get(face.getGroupId());
                         Set<Face> otherFaceGroup = result.get(otherFace.getGroupId());
 

@@ -1,5 +1,7 @@
 package org.briarheart.doomthree.util;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 /**
  * @author Roman Chigvintsev
  */
@@ -7,10 +9,7 @@ public class Rectangle2D {
     private final double width;
     private final double height;
     private final Vector2 position;
-    private final Vector2 bottomLeft;
-    private final Vector2 upperLeft;
-    private final Vector2 upperRight;
-    private final Vector2 bottomRight;
+    private final Vector2[] vertices = new Vector2[4];
 
     public Rectangle2D(Vector2 size, Vector2 position) {
         this(size.x, size.y, position);
@@ -24,10 +23,10 @@ public class Rectangle2D {
         double halfWidth = width / 2;
         double halfHeight = height / 2;
 
-        this.bottomLeft = new Vector2(position.x - halfWidth, position.y - halfHeight);
-        this.upperLeft = new Vector2(position.x - halfWidth, position.y + halfHeight);
-        this.upperRight = new Vector2(position.x + halfWidth, position.y + halfHeight);
-        this.bottomRight = new Vector2(position.x + halfWidth, position.y - halfHeight);
+        this.vertices[0] = new Vector2(position.x - halfWidth, position.y - halfHeight);
+        this.vertices[1] = new Vector2(position.x - halfWidth, position.y + halfHeight);
+        this.vertices[2] = new Vector2(position.x + halfWidth, position.y + halfHeight);
+        this.vertices[3] = new Vector2(position.x + halfWidth, position.y - halfHeight);
     }
 
     public Rectangle2D[] split(double areaThreshold) {
@@ -62,31 +61,39 @@ public class Rectangle2D {
     }
 
     public Rectangle2D merge(Rectangle2D other) {
-        if (this.upperLeft.equals(other.bottomLeft) && this.upperRight.equals(other.bottomRight)) {
+        if (this.getUpperLeft().equals(other.getBottomLeft()) && this.getUpperRight().equals(other.getBottomRight())) {
             // Merge upwards
             Vector2 position = new Vector2(this.position.x, this.position.y + other.height / 2);
             return new Rectangle2D(width, height + other.height, position);
         }
 
-        if (this.bottomLeft.equals(other.upperLeft) && this.bottomRight.equals(other.upperRight)) {
+        if (this.getBottomLeft().equals(other.getUpperLeft()) && this.getBottomRight().equals(other.getUpperRight())) {
             // Merge downwards
             Vector2 position = new Vector2(this.position.x, this.position.y - other.height / 2);
             return new Rectangle2D(width, height + other.height, position);
         }
 
-        if (this.upperRight.equals(other.upperLeft) && this.bottomRight.equals(other.bottomLeft)) {
+        if (this.getUpperRight().equals(other.getUpperLeft()) && this.getBottomRight().equals(other.getBottomLeft())) {
             // Merge to the right
             Vector2 position = new Vector2(this.position.x + other.width / 2, this.position.y);
             return new Rectangle2D(width + other.width, height, position);
         }
 
-        if (this.upperLeft.equals(other.upperRight) && this.bottomLeft.equals(other.bottomRight)) {
+        if (this.getUpperLeft().equals(other.getUpperRight()) && this.getBottomLeft().equals(other.getBottomRight())) {
             // Merge to the left
             Vector2 position = new Vector2(this.position.x - other.width / 2, this.position.y);
             return new Rectangle2D(width + other.width, height, position);
         }
 
         throw new IllegalArgumentException("Rectangles cannot be merged");
+    }
+
+    public boolean hasAtLeastTwoCommonVerticesWith(Rectangle2D other) {
+        int i = 0, j = 0;
+        while (i < 4 && j < 2)
+            if (ArrayUtils.contains(this.vertices, other.vertices[i++]))
+                j++;
+        return j > 1;
     }
 
     public double getWidth() {
@@ -102,18 +109,18 @@ public class Rectangle2D {
     }
 
     public Vector2 getBottomLeft() {
-        return bottomLeft;
+        return vertices[0];
     }
 
     public Vector2 getUpperLeft() {
-        return upperLeft;
+        return vertices[1];
     }
-
+    
     public Vector2 getUpperRight() {
-        return upperRight;
+        return vertices[2];
     }
 
     public Vector2 getBottomRight() {
-        return bottomRight;
+        return vertices[3];
     }
 }
