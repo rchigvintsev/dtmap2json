@@ -1,9 +1,13 @@
 package org.briarheart.doomthree.util;
 
+import org.apache.commons.math3.util.Precision;
+
 /**
  * @author Roman Chigvintsev
  */
 public class Vector3 {
+    private static final double ERROR = 0.00001;
+
     public final double x;
     public final double y;
     public final double z;
@@ -66,6 +70,10 @@ public class Vector3 {
         return multiplyScalar(1 / scalar);
     }
 
+    public Vector3 multiply(Vector3 v) {
+        return new Vector3(this.x * v.x, this.y * v.y, this.z * v.z);
+    }
+
     public Vector3 multiplyScalar(double scalar) {
         return new Vector3(x * scalar, y * scalar, z * scalar);
     }
@@ -122,9 +130,9 @@ public class Vector3 {
 
         Vector3 vector3 = (Vector3) o;
 
-        if (Double.compare(vector3.x, x) != 0) return false;
-        if (Double.compare(vector3.y, y) != 0) return false;
-        return Double.compare(vector3.z, z) == 0;
+        if (!Precision.equals(vector3.x, x, ERROR)) return false;
+        if (!Precision.equals(vector3.y, y, ERROR)) return false;
+        return Precision.equals(vector3.z, z, ERROR);
     }
 
     @Override

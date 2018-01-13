@@ -7,13 +7,17 @@ import org.briarheart.doomthree.util.Vector3;
  * @author Roman Chigvintsev
  */
 public class BoxBody {
-    private final Vector3 size;
-    private final Vector3 position;
-    private final Quaternion quaternion;
+    public final Vector3 origin;
+    public final Vector3 position;
+    public final Vector3 size;
+    public final Quaternion quaternion;
+    public final Vector3 normal;
 
-    public BoxBody(Vector3 size, Vector3 position, Quaternion quaternion) {
+    public BoxBody(Vector3 origin, Vector3 size, Vector3 normal, Quaternion quaternion) {
         this.size = size;
-        this.position = position;
+        this.origin = origin;
+        this.position = origin.add(normal.invert().multiplyScalar(size.z / 2.0));
+        this.normal = normal;
         this.quaternion = quaternion;
     }
 

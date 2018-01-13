@@ -1,10 +1,12 @@
 package org.briarheart.doomthree.util;
 
+import org.apache.commons.math3.util.Precision;
+
 /**
  * @author Roman Chigvintsev
  */
 public class BoundingBox {
-    private static final double ERROR = 0.00001;
+    private static final double ERROR = 1.0;
 
     private Double minX, maxX;
     private Double minY, maxY;
@@ -20,14 +22,32 @@ public class BoundingBox {
         return true;
     }
 
-    public boolean contains(BoundingBox otherBoundingBox) {
-        if (otherBoundingBox.minX < minX || otherBoundingBox.maxX > maxX)
+    public boolean contains(BoundingBox other) {
+        if (other.minX < minX || other.maxX > maxX)
             return false;
-        if (otherBoundingBox.minY < minY || otherBoundingBox.maxY > maxY)
+        if (other.minY < minY || other.maxY > maxY)
             return false;
-        if (otherBoundingBox.minZ < minZ || otherBoundingBox.maxZ > maxZ)
+        if (other.minZ < minZ || other.maxZ > maxZ)
             return false;
         return true;
+    }
+
+    public boolean overlaps(BoundingBox other) {
+        return Precision.compareTo(this.minX, other.maxX, ERROR) < 0
+                && Precision.compareTo(this.maxX, other.minX, ERROR) > 0
+                && Precision.compareTo(this.minY, other.maxY, ERROR) < 0
+                && Precision.compareTo(this.maxY, other.minY, ERROR) > 0;
+    }
+
+    public void checkBoundaries(Vector2 point) {
+        if (minX == null || point.x < minX)
+            minX = point.x;
+        if (maxX == null || point.x > maxX)
+            maxX = point.x;
+        if (minY == null || point.y < minY)
+            minY = point.y;
+        if (maxY == null || point.y > maxY)
+            maxY = point.y;
     }
 
     public void checkBoundaries(Vector3 point) {
@@ -94,21 +114,5 @@ public class BoundingBox {
 
     public double getDepth() {
         return maxZ - minZ;
-    }
-
-    public boolean isZeroWidth() {
-        return isZero(getWidth());
-    }
-
-    public boolean isZeroHeight() {
-        return isZero(getHeight());
-    }
-
-    public boolean isZeroDepth() {
-        return isZero(getDepth());
-    }
-
-    private boolean isZero(Double value) {
-        return Math.abs(value) < ERROR;
     }
 }

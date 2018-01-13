@@ -14,27 +14,29 @@ import java.util.Set;
  */
 public class SurfaceSplitter {
     private final Surface surface;
+    private final Vector3 normal;
     private final double areaThreshold;
     private final double boxBodyThickness;
 
-    public SurfaceSplitter(Surface surface, double areaThreshold, double boxBodyThickness) {
+    public SurfaceSplitter(Surface surface, Vector3 normal, double areaThreshold, double boxBodyThickness) {
         this.surface = surface;
+        this.normal = normal;
         this.areaThreshold = areaThreshold;
         this.boxBodyThickness = boxBodyThickness;
     }
 
-    public List<BoxBody> split(Set<Face> faces, Vector3 position, Quaternion quaternion, Vector3 size) {
+    public List<BoxBody> split(Set<Face> faces, Vector3 origin, Quaternion quaternion, Vector3 size) {
         Matrix4 worldMatrix = new Matrix4();
-        worldMatrix.compose(position, quaternion);
-        Vector3 localPosition = position.worldToLocal(worldMatrix);
-        Rectangle2D root = new Rectangle2D(size.toVector2(), localPosition.toVector2());
+        worldMatrix.compose(origin, quaternion);
+        Vector3 localOrigin = origin.worldToLocal(worldMatrix);
+        Rectangle2D root = new Rectangle2D(size.toVector2(), localOrigin.toVector2());
         List<Rectangle2D> rectangles = new LinkedList<>();
         split0(root, faces, worldMatrix, rectangles);
         List<BoxBody> bodies = new ArrayList<>(rectangles.size());
         for (Rectangle2D rectangle : rectangles) {
             Vector3 bodySize = new Vector3(rectangle.getWidth(), rectangle.getHeight(), this.boxBodyThickness);
-            Vector3 bodyPosition = new Vector3(rectangle.getPosition()).localToWorld(worldMatrix);
-            bodies.add(new BoxBody(bodySize, bodyPosition, quaternion));
+            Vector3 bodyOrigin = new Vector3(rectangle.getPosition()).localToWorld(worldMatrix);
+            bodies.add(new BoxBody(bodyOrigin, bodySize, this.normal, quaternion));
         }
         return bodies;
     }
