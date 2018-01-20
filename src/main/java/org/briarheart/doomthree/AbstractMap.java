@@ -5,6 +5,7 @@ import org.briarheart.doomthree.entity.Entity;
 import org.briarheart.doomthree.entity.InfoPlayerStart;
 import org.briarheart.doomthree.entity.Light;
 import org.briarheart.doomthree.model.Model;
+import org.briarheart.doomthree.model.surface.Surface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 /**
  * @author Roman Chigvintsev
  */
-public class Map {
+public abstract class AbstractMap {
     private final String name;
     private final String areaFilter;
     private final List<Model> models = new ArrayList<>();
@@ -21,11 +22,11 @@ public class Map {
 
     private InfoPlayerStart infoPlayerStart;
 
-    public Map(String name) {
+    public AbstractMap(String name) {
         this(name, null);
     }
 
-    public Map(String name, String areaFilter) {
+    public AbstractMap(String name, String areaFilter) {
         this.name = name;
         this.areaFilter = areaFilter;
         this.meta = new Meta(name);
@@ -61,6 +62,14 @@ public class Map {
 
     public void addEntity(Entity entity) {
         entity.visit(this);
+    }
+
+    public Model newModel(String body) {
+        return new Model(this, body);
+    }
+
+    public Surface newSurface(Model model, String surfaceBody) {
+        return new Surface(model, surfaceBody);
     }
 
     public void addModel(Model model) {

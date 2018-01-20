@@ -1,6 +1,6 @@
 package org.briarheart.doomthree.entity;
 
-import org.briarheart.doomthree.Map;
+import org.briarheart.doomthree.AbstractMap;
 import org.briarheart.doomthree.util.Vector3;
 
 /**
@@ -14,7 +14,7 @@ public class InfoPlayerStart extends Entity {
     }
 
     @Override
-    public void visit(Map map) {
+    public void visit(AbstractMap map) {
         map.setInfoPlayerStart(this);
     }
 

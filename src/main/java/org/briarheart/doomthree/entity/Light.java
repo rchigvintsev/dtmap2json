@@ -1,7 +1,7 @@
 package org.briarheart.doomthree.entity;
 
 import org.apache.commons.lang3.StringUtils;
-import org.briarheart.doomthree.Map;
+import org.briarheart.doomthree.AbstractMap;
 import org.briarheart.doomthree.model.Model;
 import org.briarheart.doomthree.util.Vector3;
 
@@ -24,7 +24,7 @@ public class Light extends Entity {
     }
 
     @Override
-    public void visit(Map map) {
+    public void visit(AbstractMap map) {
         for (Model model : map.getModels())
             if (model.getBoundingBox().contains(position)) {
                 model.getLights().add(this);

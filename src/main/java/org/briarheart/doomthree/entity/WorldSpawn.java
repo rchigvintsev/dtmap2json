@@ -1,6 +1,6 @@
 package org.briarheart.doomthree.entity;
 
-import org.briarheart.doomthree.Map;
+import org.briarheart.doomthree.AbstractMap;
 
 /**
  * @author Roman Chigvintsev
@@ -11,7 +11,7 @@ public class WorldSpawn extends Entity {
     }
 
     @Override
-    public void visit(Map map) {
+    public void visit(AbstractMap map) {
     }
 
     @Override

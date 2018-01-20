@@ -1,7 +1,7 @@
 package org.briarheart.doomthree.model;
 
 import org.apache.commons.lang3.Validate;
-import org.briarheart.doomthree.Map;
+import org.briarheart.doomthree.AbstractMap;
 import org.briarheart.doomthree.entity.Light;
 import org.briarheart.doomthree.model.surface.Surface;
 import org.briarheart.doomthree.util.BoundingBox;
@@ -25,10 +25,13 @@ public class Model {
     private final List<Surface> surfaces = new ArrayList<>();
     private final List<Light> lights = new ArrayList<>();
 
+    private final AbstractMap map;
+
     private String name;
     private int numberOfSurfaces;
 
-    public Model(String modelBody) {
+    public Model(AbstractMap map, String modelBody) {
+        this.map = map;
         parse(modelBody);
     }
 
@@ -44,7 +47,7 @@ public class Model {
         return lights;
     }
 
-    public void updateMapMeta(Map.Meta meta) {
+    public void updateMapMeta(AbstractMap.Meta meta) {
         for (Surface surface : surfaces)
             meta.getMaterials().add(surface.getMaterialName());
     }
@@ -116,7 +119,7 @@ public class Model {
                 String line = scanner.nextLine().trim();
                 surfaceBody.append("\n").append(line);
                 if (line.equals("}"))
-                    return new Surface(this, surfaceBody.toString());
+                    return map.newSurface(this, surfaceBody.toString());
             }
             System.err.println("Unexpected end of model body");
         } else

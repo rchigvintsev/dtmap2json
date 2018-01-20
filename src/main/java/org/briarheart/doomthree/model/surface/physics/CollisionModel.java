@@ -16,7 +16,7 @@ public class CollisionModel {
 
     private List<BoxBody> bodies = new ArrayList<>();
 
-    public CollisionModel(Surface surface) {
+    public CollisionModel(Surface surface, PhysicsMaterial physicsMaterial) {
         for (Map.Entry<Long, Set<Face>> entry : groupCoplanarFaces(surface).entrySet()) {
             Set<Face> faces = entry.getValue();
             if (faces.size() > 1) {
@@ -34,15 +34,15 @@ public class CollisionModel {
                         if (areaDelta < 0)
                             System.err.println("Part of surface \"" + surface.getName() + "\" of model \""
                                     + surface.getModel().getName() + "\" has area much larger than area of "
-                                    + "physical body");
+                                    + "physics body");
                         else {
-                            SurfaceSplitter splitter = new SurfaceSplitter(surface, normal, AREA_THRESHOLD,
-                                    DEFAULT_BOX_BODY_THICKNESS);
+                            SurfaceSplitter splitter = new SurfaceSplitter(surface, physicsMaterial, normal,
+                                    AREA_THRESHOLD, DEFAULT_BOX_BODY_THICKNESS);
                             bodies.addAll(splitter.split(faces, origin, quaternion, size));
                         }
                     } else {
                         Vector3 bodySize = new Vector3(size.x, size.y, DEFAULT_BOX_BODY_THICKNESS);
-                        bodies.add(new BoxBody(origin, bodySize, normal, quaternion));
+                        bodies.add(new BoxBody(origin, bodySize, normal, quaternion, physicsMaterial));
                     }
                 }
             }
@@ -154,13 +154,14 @@ public class CollisionModel {
                         if (bb.overlaps(otherBb)) {
                             if (body.size.z > distance) {
                                 Vector3 newSize = new Vector3(body.size.x, body.size.y, distance);
-                                bodies.set(i, new BoxBody(body.origin, newSize, body.normal, body.quaternion));
+                                bodies.set(i, new BoxBody(body.origin, newSize, body.normal, body.quaternion,
+                                        body.material));
                             }
 
                             if (otherBody.size.z > distance) {
                                 Vector3 newOtherSize = new Vector3(otherBody.size.x, otherBody.size.y, distance);
                                 bodies.set(j, new BoxBody(otherBody.origin, newOtherSize, otherBody.normal,
-                                        otherBody.quaternion));
+                                        otherBody.quaternion, otherBody.material));
                             }
                         }
                     }

@@ -30,7 +30,7 @@ public class Main {
         if (args.length > 1)
             area = args[1];
 
-        Map map = new Map(mapName, area);
+        AbstractMap map = MapFactory.createMap(mapName, area);
 
         readModels(map);
         readEntities(map);
@@ -41,7 +41,7 @@ public class Main {
         System.out.println(map.getMeta());
     }
 
-    private static void readEntities(Map map) {
+    private static void readEntities(AbstractMap map) {
         try (Scanner scanner = new Scanner(new FileInputStream(map.getName() + ".map"))) {
             MutableInt lineNumber = new MutableInt();
 
@@ -93,7 +93,7 @@ public class Main {
         return null;
     }
 
-    private static void readModels(Map map) {
+    private static void readModels(AbstractMap map) {
         try (Scanner scanner = new Scanner(new FileInputStream(map.getName() + ".proc"))) {
             MutableInt lineNumber = new MutableInt();
 
@@ -105,7 +105,7 @@ public class Main {
 
                 if (line.startsWith("model {")) {
                     int startedAt = lineNumber.intValue();
-                    Model model = readNextModel(scanner, line, lineNumber);
+                    Model model = readNextModel(scanner, line, lineNumber, map);
                     if (model == null)
                         System.err.println("Unrecognized model started at line " + startedAt);
                     else
@@ -117,7 +117,7 @@ public class Main {
         }
     }
 
-    private static Model readNextModel(Scanner scanner, String header, MutableInt lineNumber) {
+    private static Model readNextModel(Scanner scanner, String header, MutableInt lineNumber, AbstractMap map) {
         StringBuilder modelBody = new StringBuilder(header);
         Deque<Character> openedBraces = new LinkedList<>();
         openedBraces.push('{'); // Brace in header
@@ -130,8 +130,9 @@ public class Main {
 
             if (line.equals("}")) {
                 openedBraces.pop();
-                if (openedBraces.isEmpty())
-                    return new Model(modelBody.toString());
+                if (openedBraces.isEmpty()) {
+                    return map.newModel(modelBody.toString());
+                }
             } else if (line.contains("{"))
                 openedBraces.push('{');
 

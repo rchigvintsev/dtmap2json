@@ -11,4 +11,8 @@ public class Materials {
     public static boolean isDecal(String materialName) {
         return materialName.contains("/decals/");
     }
+
+    public static boolean isFloor(String materialName) {
+        return materialName.contains("/base_floor/");
+    }
 }

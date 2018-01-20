@@ -1,6 +1,6 @@
 package org.briarheart.doomthree.entity;
 
-import org.briarheart.doomthree.Map;
+import org.briarheart.doomthree.AbstractMap;
 import org.briarheart.doomthree.util.Vector3;
 
 import java.util.regex.Matcher;
@@ -16,7 +16,7 @@ public abstract class Entity {
         parse(entityBody);
     }
 
-    public abstract void visit(Map map);
+    public abstract void visit(AbstractMap map);
 
     @Override
     public String toString() {

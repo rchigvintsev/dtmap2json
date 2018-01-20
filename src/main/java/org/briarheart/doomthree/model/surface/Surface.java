@@ -5,6 +5,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.briarheart.doomthree.model.Model;
 import org.briarheart.doomthree.model.surface.material.Materials;
 import org.briarheart.doomthree.model.surface.physics.CollisionModel;
+import org.briarheart.doomthree.model.surface.physics.PhysicsMaterial;
 import org.briarheart.doomthree.util.BoundingBox;
 import org.briarheart.doomthree.util.Vector2;
 import org.briarheart.doomthree.util.Vector3;
@@ -115,7 +116,7 @@ public class Surface {
         parseVertices(surfaceBody, i);
         parseFaces(surfaceBody, i);
         if (!Materials.isDecal(materialName))
-            collisionModel = new CollisionModel(this);
+            collisionModel = new CollisionModel(this, getPhysicsMaterial(materialName));
     }
 
     protected void parseVertices(String surfaceBody, MutableInt i) {
@@ -173,5 +174,11 @@ public class Surface {
         if (faceArray != null)
             faces.add(new Face(faces.size() + 1, faceArray, vertices[faceArray[0]].normal));
         this.faces = faces.toArray(new Face[faces.size()]);
+    }
+
+    protected PhysicsMaterial getPhysicsMaterial(String materialName) {
+        if (Materials.isFloor(materialName))
+            return PhysicsMaterial.FLOOR;
+        return PhysicsMaterial.DEFAULT;
     }
 }

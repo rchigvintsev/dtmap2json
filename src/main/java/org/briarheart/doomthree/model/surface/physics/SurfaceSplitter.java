@@ -14,12 +14,18 @@ import java.util.Set;
  */
 public class SurfaceSplitter {
     private final Surface surface;
+    private final PhysicsMaterial physicsMaterial;
     private final Vector3 normal;
     private final double areaThreshold;
     private final double boxBodyThickness;
 
-    public SurfaceSplitter(Surface surface, Vector3 normal, double areaThreshold, double boxBodyThickness) {
+    public SurfaceSplitter(Surface surface,
+                           PhysicsMaterial physicsMaterial,
+                           Vector3 normal,
+                           double areaThreshold,
+                           double boxBodyThickness) {
         this.surface = surface;
+        this.physicsMaterial = physicsMaterial;
         this.normal = normal;
         this.areaThreshold = areaThreshold;
         this.boxBodyThickness = boxBodyThickness;
@@ -36,7 +42,7 @@ public class SurfaceSplitter {
         for (Rectangle2D rectangle : rectangles) {
             Vector3 bodySize = new Vector3(rectangle.getWidth(), rectangle.getHeight(), this.boxBodyThickness);
             Vector3 bodyOrigin = new Vector3(rectangle.getPosition()).localToWorld(worldMatrix);
-            bodies.add(new BoxBody(bodyOrigin, bodySize, this.normal, quaternion));
+            bodies.add(new BoxBody(bodyOrigin, bodySize, this.normal, quaternion, this.physicsMaterial));
         }
         return bodies;
     }
