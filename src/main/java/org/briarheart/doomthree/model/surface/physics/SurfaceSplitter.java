@@ -35,18 +35,58 @@ public class SurfaceSplitter {
         Matrix4 worldMatrix = new Matrix4();
         worldMatrix.compose(origin, quaternion);
         Vector3 localOrigin = origin.worldToLocal(worldMatrix);
-        Rectangle2D root = new Rectangle2D(size.toVector2(), localOrigin.toVector2());
+        List<Rectangle2D> roots = createRoots(size, localOrigin);
         List<Rectangle2D> rectangles = new LinkedList<>();
-        split0(root, faces, worldMatrix, rectangles);
+        for (Rectangle2D root : roots)
+            split0(root, faces, worldMatrix, rectangles);
         List<BoxBody> bodies = new ArrayList<>(rectangles.size());
         for (Rectangle2D rectangle : rectangles) {
-            Vector3 bodySize = new Vector3(rectangle.getWidth(), rectangle.getHeight(), this.boxBodyThickness);
-            Vector3 bodyOrigin = new Vector3(rectangle.getPosition()).localToWorld(worldMatrix);
+            Vector3 bodySize = new Vector3(rectangle.width, rectangle.height, this.boxBodyThickness);
+            Vector3 bodyOrigin = new Vector3(rectangle.position).localToWorld(worldMatrix);
             bodies.add(new BoxBody(bodyOrigin, bodySize, this.normal, quaternion, this.physicsMaterial));
         }
         return bodies;
     }
 
+    /**
+     * Divides rectangles with large difference between lengths of the sides into square-like parts.
+     */
+    private List<Rectangle2D> createRoots(Vector3 size, Vector3 origin) {
+        List<Rectangle2D> result = new ArrayList<>();
+
+        double width = size.x, height = size.y;
+        double a = Math.max(width, height), b = Math.min(width, height);
+        double p = 0.0;
+
+        int c = 0;
+        if (width != height) {
+            p = width > height ? origin.x : origin.y;
+            double ratio = b / a;
+            while (ratio < 0.5) {
+                a /= 2.0;
+                p -= a / 2;
+                ratio = b / a;
+                c++;
+            }
+        }
+
+        if (c == 0)
+            result.add(new Rectangle2D(width, height, origin.toVector2()));
+        else {
+            int length = (int) Math.pow(2, c);
+            for (int i = 0; i < length; i++) {
+                if (width > height) {
+                    Vector2 position = new Vector2(p + a * i, origin.y);
+                    result.add(new Rectangle2D(a, b, position));
+                } else {
+                    Vector2 position = new Vector2(origin.x, p + a * i);
+                    result.add(new Rectangle2D(b, a, position));
+                }
+            }
+        }
+
+        return result;
+    }
 
     private void split0(Rectangle2D root, Set<Face> faces, Matrix4 worldMatrix, List<Rectangle2D> rectangles) {
         Rectangle2D[] subRects = root.split(areaThreshold);

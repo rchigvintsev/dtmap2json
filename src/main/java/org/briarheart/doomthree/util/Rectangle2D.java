@@ -6,9 +6,10 @@ import org.apache.commons.lang3.ArrayUtils;
  * @author Roman Chigvintsev
  */
 public class Rectangle2D {
-    private final double width;
-    private final double height;
-    private final Vector2 position;
+    public final double width;
+    public final double height;
+    public final Vector2 position;
+
     private final Vector2[] vertices = new Vector2[4];
 
     public Rectangle2D(Vector2 size, Vector2 position) {
@@ -94,18 +95,6 @@ public class Rectangle2D {
             if (ArrayUtils.contains(this.vertices, other.vertices[i++]))
                 j++;
         return j > 1;
-    }
-
-    public double getWidth() {
-        return width;
-    }
-
-    public double getHeight() {
-        return height;
-    }
-
-    public Vector2 getPosition() {
-        return position;
     }
 
     public Vector2 getBottomLeft() {
