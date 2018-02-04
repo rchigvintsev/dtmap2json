@@ -23,7 +23,7 @@ public class CollisionModel {
                 double realArea = computeArea(faces, surface);
                 if (realArea > AREA_THRESHOLD) {
                     Vector3 origin = computeOrigin(faces, surface);
-                    Vector3 normal = getNormal(faces);
+                    Vector3 normal = computeNormal(faces);
                     Quaternion quaternion = computeQuaternion(origin, normal);
                     Vector3 size = computeSize(faces, origin, quaternion, surface);
 
@@ -170,10 +170,6 @@ public class CollisionModel {
         }
     }
 
-    private Vector3 getNormal(Set<Face> faces) {
-        return faces.iterator().next().normal;
-    }
-
     private Vector3 computeOrigin(Set<Face> faces, Surface surface) {
         BoundingBox boundingBox = new BoundingBox();
         for (Face face : faces) {
@@ -185,6 +181,19 @@ public class CollisionModel {
         double yPos = boundingBox.getMinY() + (boundingBox.getHeight() / 2.0);
         double zPos = boundingBox.getMinZ() + (boundingBox.getDepth() / 2.0);
         return new Vector3(xPos, yPos, zPos);
+    }
+
+    /**
+     * Computes average normal for faces set.
+     */
+    private Vector3 computeNormal(Set<Face> faces) {
+        double x = 0.0, y = 0.0, z = 0.0;
+        for (Face face : faces) {
+            x += face.normal.x;
+            y += face.normal.y;
+            z += face.normal.z;
+        }
+        return new Vector3(x / faces.size(), y / faces.size(), z / faces.size());
     }
 
     private Quaternion computeQuaternion(Vector3 position, Vector3 normal) {
