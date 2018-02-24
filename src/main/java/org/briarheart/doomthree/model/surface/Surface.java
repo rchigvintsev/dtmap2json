@@ -3,7 +3,6 @@ package org.briarheart.doomthree.model.surface;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.briarheart.doomthree.model.Model;
-import org.briarheart.doomthree.model.surface.material.Materials;
 import org.briarheart.doomthree.model.surface.physics.CollisionModel;
 import org.briarheart.doomthree.model.surface.physics.PhysicsMaterial;
 import org.briarheart.doomthree.util.BoundingBox;
@@ -17,6 +16,7 @@ import java.util.regex.Pattern;
 
 import static java.lang.Double.parseDouble;
 import static java.lang.Integer.parseInt;
+import static org.briarheart.doomthree.model.surface.material.Materials.*;
 
 /**
  * @author Roman Chigvintsev
@@ -115,7 +115,7 @@ public class Surface {
         MutableInt i = new MutableInt();
         parseVertices(surfaceBody, i);
         parseFaces(surfaceBody, i);
-        if (!Materials.isDecal(materialName))
+        if (isNeedToCreateCollisionModel(materialName))
             collisionModel = new CollisionModel(this, getPhysicsMaterial(materialName));
     }
 
@@ -176,8 +176,12 @@ public class Surface {
         this.faces = faces.toArray(new Face[faces.size()]);
     }
 
+    protected boolean isNeedToCreateCollisionModel(String materialName) {
+        return !isDecal(materialName) && !isSoil(materialName) && !isSkyBox(materialName);
+    }
+
     protected PhysicsMaterial getPhysicsMaterial(String materialName) {
-        if (Materials.isFloor(materialName))
+        if (isFloor(materialName))
             return PhysicsMaterial.FLOOR;
         return PhysicsMaterial.DEFAULT;
     }

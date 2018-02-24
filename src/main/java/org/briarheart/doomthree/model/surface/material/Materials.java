@@ -15,4 +15,12 @@ public class Materials {
     public static boolean isFloor(String materialName) {
         return materialName.contains("/base_floor/");
     }
+
+    public static boolean isSoil(String materialName) {
+        return materialName.contains("skysand");
+    }
+
+    public static boolean isSkyBox(String materialName) {
+        return materialName.contains("skies");
+    }
 }
