@@ -58,7 +58,7 @@ public class Face implements Identifiable {
     }
 
     public boolean isCoplanar(Face other) {
-        return normal.angleTo(other.normal) * (180 / Math.PI) < 11.0;
+        return normal.angleTo(other.normal) * (180 / Math.PI) < 30.0;
     }
 
     public boolean containsVertex(int v) {
