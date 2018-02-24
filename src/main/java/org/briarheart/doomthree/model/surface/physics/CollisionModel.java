@@ -10,14 +10,15 @@ import java.util.*;
  * @author Roman Chigvintsev
  */
 public class CollisionModel {
-    private static final double AREA_DELTA_THRESHOLD = 1000.0;
+    private static final double AREA_DELTA_THRESHOLD = 15.0;
     private static final double AREA_THRESHOLD = 100.0;
     private static final double DEFAULT_BOX_BODY_THICKNESS = 10.0;
 
     private List<BoxBody> bodies = new ArrayList<>();
 
     public CollisionModel(Surface surface, PhysicsMaterial physicsMaterial) {
-        for (Map.Entry<Long, Set<Face>> entry : groupCoplanarFaces(surface).entrySet()) {
+        Map<Long, Set<Face>> coplanarFaces = groupCoplanarFaces(surface);
+        for (Map.Entry<Long, Set<Face>> entry : coplanarFaces.entrySet()) {
             Set<Face> faces = entry.getValue();
             if (faces.size() > 1) {
                 double realArea = computeArea(faces, surface);
@@ -28,7 +29,7 @@ public class CollisionModel {
                     Vector3 size = computeSize(faces, origin, quaternion, surface);
 
                     double bodyArea = size.x * size.y;
-                    double areaDelta = bodyArea - realArea;
+                    double areaDelta = (bodyArea - realArea) / (realArea / 100.0);
 
                     if (Math.abs(areaDelta) > AREA_DELTA_THRESHOLD) {
                         if (areaDelta < 0)
