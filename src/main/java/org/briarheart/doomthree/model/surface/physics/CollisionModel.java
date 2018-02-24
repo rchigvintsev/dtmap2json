@@ -10,7 +10,7 @@ import java.util.*;
  * @author Roman Chigvintsev
  */
 public class CollisionModel {
-    private static final double AREA_DELTA_THRESHOLD = 15.0;
+    private static final double AREA_DELTA_THRESHOLD = 5;
     private static final double AREA_THRESHOLD = 100.0;
     private static final double DEFAULT_BOX_BODY_THICKNESS = 10.0;
 
