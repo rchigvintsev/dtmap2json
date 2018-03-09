@@ -3,8 +3,8 @@ package org.briarheart.doomthree.model.surface;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.briarheart.doomthree.model.Model;
-import org.briarheart.doomthree.model.surface.physics.CollisionModel;
-import org.briarheart.doomthree.model.surface.physics.PhysicsMaterial;
+import org.briarheart.doomthree.model.surface.material.Materials;
+import org.briarheart.doomthree.model.surface.physics.*;
 import org.briarheart.doomthree.util.BoundingBox;
 import org.briarheart.doomthree.util.Vector2;
 import org.briarheart.doomthree.util.Vector3;
@@ -24,6 +24,9 @@ import static org.briarheart.doomthree.model.surface.material.Materials.*;
 public class Surface {
     private static final Pattern HEADER_PATTERN = Pattern
             .compile("/\\* (surface \\d+) \\*/ \\{ \"([\\w/_]+)\" /\\* numVerts = \\*/ (\\d+)");
+
+    private final static CollisionModelBuildingStrategy BOX_SET_STRATEGY = new BoxSetStrategy();
+    private final static CollisionModelBuildingStrategy TRIMESH_STRATEGY = new TrimeshStrategy();
 
     private final Model model;
 
@@ -115,8 +118,13 @@ public class Surface {
         MutableInt i = new MutableInt();
         parseVertices(surfaceBody, i);
         parseFaces(surfaceBody, i);
-        if (isNeedToCreateCollisionModel(materialName))
-            collisionModel = new CollisionModel(this, getPhysicsMaterial(materialName));
+        if (isNeedToCreateCollisionModel(materialName)) {
+            PhysicsMaterial physicsMaterial = getPhysicsMaterial(materialName);
+            CollisionModelBuildingStrategy cmBuildingStrategy = Materials.isPipe(materialName)
+                    ? TRIMESH_STRATEGY
+                    : BOX_SET_STRATEGY;
+            collisionModel = CollisionModel.newCollisionModel(this, physicsMaterial, cmBuildingStrategy);
+        }
     }
 
     protected void parseVertices(String surfaceBody, MutableInt i) {

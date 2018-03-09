@@ -2,6 +2,7 @@ package org.briarheart.doomthree.model.surface.physics;
 
 import org.briarheart.doomthree.model.surface.Face;
 import org.briarheart.doomthree.model.surface.Surface;
+import org.briarheart.doomthree.model.surface.physics.body.BoxBody;
 import org.briarheart.doomthree.util.*;
 
 import java.util.ArrayList;

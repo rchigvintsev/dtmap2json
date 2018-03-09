@@ -23,4 +23,8 @@ public class Materials {
     public static boolean isSkyBox(String materialName) {
         return materialName.contains("skies");
     }
+
+    public static boolean isPipe(String materialName) {
+        return materialName.contains("pipe");
+    }
 }
