@@ -14,7 +14,7 @@ public class Site3Surface extends Surface {
     @Override
     protected boolean isNeedToCreateCollisionModel(String materialName) {
         boolean result = super.isNeedToCreateCollisionModel(materialName);
-        if (result && materialName.contains("/sfx/"))
+        if (result && (materialName.contains("/sfx/") || materialName.contains("/outside/")))
             result = false;
         return result;
     }
