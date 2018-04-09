@@ -41,16 +41,22 @@ public class BoxSetStrategy implements CollisionModelBuildingStrategy {
                         else {
                             SurfaceSplitter splitter = new SurfaceSplitter(surface, physicsMaterial, normal,
                                     AREA_THRESHOLD, DEFAULT_BOX_BODY_THICKNESS);
-                            bodies.addAll(splitter.split(faces, origin, quaternion, size));
+                            BoxBody body = splitter.split(faces, origin, quaternion, size);
+                            if (!body.getShapes().isEmpty())
+                                bodies.add(body);
                         }
                     } else {
-                        Vector3 bodySize = new Vector3(size.x, size.y, DEFAULT_BOX_BODY_THICKNESS);
-                        bodies.add(new BoxBody(origin, bodySize, normal, quaternion, physicsMaterial));
+                        BoxBody body = new BoxBody(origin, normal, physicsMaterial);
+                        Vector3 shapeSize = new Vector3(size.x, size.y, DEFAULT_BOX_BODY_THICKNESS);
+                        Vector3 shapeOffset = new Vector3()
+                                .add(normal.invert().multiplyScalar(shapeSize.z / 2.0));
+                        body.getShapes().add(new BoxBody.Shape(shapeSize, shapeOffset, quaternion));
+                        bodies.add(body);
                     }
                 }
             }
         }
-        reduceThicknessOfTightlyLocatedBoxBodies(bodies);
+        reduceDepthOfTightlyLocatedShapes(bodies);
         return bodies;
     }
 
@@ -109,48 +115,41 @@ public class BoxSetStrategy implements CollisionModelBuildingStrategy {
         return result;
     }
 
-    private void reduceThicknessOfTightlyLocatedBoxBodies(List<BoxBody> bodies) {
-        for (int i = 0; i < bodies.size(); i++) {
-            BoxBody body = bodies.get(i);
+    private void reduceDepthOfTightlyLocatedShapes(List<BoxBody> bodies) {
+        for (int bi = 0; bi < bodies.size(); bi++) {
+            BoxBody body = bodies.get(bi);
             Vector3 invertedNormal = body.normal.invert();
-            for (int j = i + 1; j < bodies.size(); j++) {
-                BoxBody otherBody = bodies.get(j);
-                if (otherBody.normal.equals(invertedNormal)) {
-                    Vector3 v1 = body.origin.multiply(body.normal);
-                    Vector3 v2 = otherBody.origin.multiply(body.normal);
-                    double distance = v1.distanceTo(v2);
-                    if (distance < DEFAULT_BOX_BODY_THICKNESS && (distance < body.size.z || distance < otherBody.size.z)) {
-                        Matrix4 worldMatrix = new Matrix4();
-                        worldMatrix.compose(body.origin, body.quaternion);
+            for (int bj = bi + 1; bj < bodies.size(); bj++) {
+                BoxBody otherBody = bodies.get(bj);
+                if (!otherBody.normal.equals(invertedNormal))
+                    continue;
 
-                        Vector3 localOrigin = body.origin.worldToLocal(worldMatrix);
-                        Rectangle2D rect = new Rectangle2D(body.size.toVector2(), localOrigin.toVector2());
-                        BoundingBox bb = new BoundingBox();
-                        bb.checkBoundaries(rect.getBottomLeft());
-                        bb.checkBoundaries(rect.getUpperLeft());
-                        bb.checkBoundaries(rect.getUpperRight());
-                        bb.checkBoundaries(rect.getBottomRight());
+                double distance = computeDistanceBetweenBodies(body, otherBody);
+                if (distance >= DEFAULT_BOX_BODY_THICKNESS)
+                    continue;
 
-                        Vector3 otherLocalOrigin = otherBody.origin.worldToLocal(worldMatrix);
-                        Rectangle2D otherRect = new Rectangle2D(otherBody.size.toVector2(), otherLocalOrigin.toVector2());
-                        BoundingBox otherBb = new BoundingBox();
-                        otherBb.checkBoundaries(otherRect.getBottomLeft());
-                        otherBb.checkBoundaries(otherRect.getUpperLeft());
-                        otherBb.checkBoundaries(otherRect.getUpperRight());
-                        otherBb.checkBoundaries(otherRect.getBottomRight());
+                for (int si = 0; si < body.getShapes().size(); si++) {
+                    BoxBody.Shape shape = body.getShapes().get(si);
+                    if (shape.size.z <= distance)
+                        continue;
+
+                    Matrix4 worldMatrix = new Matrix4();
+                    worldMatrix.compose(body.position, shape.quaternion);
+
+                    Vector3 localOrigin = body.position.worldToLocal(worldMatrix);
+                    BoundingBox bb = createBoundingBox(shape.size.toVector2(), localOrigin.toVector2());
+
+                    for (int sj = 0; sj < otherBody.getShapes().size(); sj++) {
+                        BoxBody.Shape otherShape = otherBody.getShapes().get(sj);
+                        if (otherShape.size.z <= distance)
+                            continue;
+
+                        Vector3 otherLocalOrigin = otherBody.position.worldToLocal(worldMatrix);
+                        BoundingBox otherBb = createBoundingBox(otherShape.size.toVector2(), otherLocalOrigin.toVector2());
 
                         if (bb.overlaps(otherBb)) {
-                            if (body.size.z > distance) {
-                                Vector3 newSize = new Vector3(body.size.x, body.size.y, distance);
-                                bodies.set(i, new BoxBody(body.origin, newSize, body.normal, body.quaternion,
-                                        body.getMaterial()));
-                            }
-
-                            if (otherBody.size.z > distance) {
-                                Vector3 newOtherSize = new Vector3(otherBody.size.x, otherBody.size.y, distance);
-                                bodies.set(j, new BoxBody(otherBody.origin, newOtherSize, otherBody.normal,
-                                        otherBody.quaternion, otherBody.getMaterial()));
-                            }
+                            body.getShapes().set(si, reduceShapeDepth(shape, body.normal, distance));
+                            otherBody.getShapes().set(sj, reduceShapeDepth(otherShape, otherBody.normal, distance));
                         }
                     }
                 }
@@ -211,5 +210,30 @@ public class BoxSetStrategy implements CollisionModelBuildingStrategy {
         for (Face face : faces)
             result += face.getArea(surface);
         return result;
+    }
+
+    private double computeDistanceBetweenBodies(BoxBody body1, BoxBody body2) {
+        Vector3 v1 = body1.position.multiply(body1.normal);
+        Vector3 v2 = body2.position.multiply(body1.normal);
+        return v1.distanceTo(v2);
+    }
+
+    private BoundingBox createBoundingBox(Vector2 size, Vector2 position) {
+        Rectangle2D rect = new Rectangle2D(size, position);
+        BoundingBox bb = new BoundingBox();
+        bb.checkBoundaries(rect.getBottomLeft());
+        bb.checkBoundaries(rect.getUpperLeft());
+        bb.checkBoundaries(rect.getUpperRight());
+        bb.checkBoundaries(rect.getBottomRight());
+        return bb;
+    }
+
+    private BoxBody.Shape reduceShapeDepth(BoxBody.Shape shape, Vector3 normal, double newDepth) {
+        Vector3 newSize = new Vector3(shape.size.x, shape.size.y, newDepth);
+        Vector3 invertedNormal = normal.invert();
+        Vector3 newOffset = shape.offset
+                .sub(invertedNormal.multiplyScalar(shape.size.z / 2.0))
+                .add(invertedNormal.multiplyScalar(newSize.z / 2.0));
+        return new BoxBody.Shape(newSize, newOffset, shape.quaternion);
     }
 }

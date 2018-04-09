@@ -32,7 +32,7 @@ public class SurfaceSplitter {
         this.boxBodyThickness = boxBodyThickness;
     }
 
-    public List<BoxBody> split(Set<Face> faces, Vector3 origin, Quaternion quaternion, Vector3 size) {
+    public BoxBody split(Set<Face> faces, Vector3 origin, Quaternion quaternion, Vector3 size) {
         Matrix4 worldMatrix = new Matrix4();
         worldMatrix.compose(origin, quaternion);
         Vector3 localOrigin = origin.worldToLocal(worldMatrix);
@@ -40,13 +40,16 @@ public class SurfaceSplitter {
         List<Rectangle2D> rectangles = new LinkedList<>();
         for (Rectangle2D root : roots)
             split0(root, faces, worldMatrix, rectangles);
-        List<BoxBody> bodies = new ArrayList<>(rectangles.size());
+        BoxBody body = new BoxBody(origin, this.normal, this.physicsMaterial);
         for (Rectangle2D rectangle : rectangles) {
-            Vector3 bodySize = new Vector3(rectangle.width, rectangle.height, this.boxBodyThickness);
-            Vector3 bodyOrigin = new Vector3(rectangle.position).localToWorld(worldMatrix);
-            bodies.add(new BoxBody(bodyOrigin, bodySize, this.normal, quaternion, this.physicsMaterial));
+            Vector3 shapeSize = new Vector3(rectangle.width, rectangle.height, this.boxBodyThickness);
+            Vector3 shapeOffset = new Vector3(rectangle.position)
+                    .localToWorld(worldMatrix)
+                    .sub(origin)
+                    .add(this.normal.invert().multiplyScalar(shapeSize.z / 2.0));
+            body.getShapes().add(new BoxBody.Shape(shapeSize, shapeOffset, quaternion));
         }
-        return bodies;
+        return body;
     }
 
     /**
