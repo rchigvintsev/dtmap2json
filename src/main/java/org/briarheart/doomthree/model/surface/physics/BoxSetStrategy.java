@@ -17,7 +17,7 @@ public class BoxSetStrategy implements CollisionModelBuildingStrategy {
     private static final double DEFAULT_BOX_BODY_THICKNESS = 10.0;
 
     @Override
-    public Collection<? extends Body> createBodies(Surface surface, PhysicsMaterial physicsMaterial) {
+    public Body createBody(Surface surface, PhysicsMaterial physicsMaterial) {
         List<BoxBody> bodies = new ArrayList<>();
         Map<Long, Set<Face>> coplanarFaces = groupCoplanarFaces(surface);
         for (Map.Entry<Long, Set<Face>> entry : coplanarFaces.entrySet()) {
@@ -57,7 +57,19 @@ public class BoxSetStrategy implements CollisionModelBuildingStrategy {
             }
         }
         reduceDepthOfTightlyLocatedShapes(bodies);
-        return bodies;
+
+        if (bodies.isEmpty())
+            return null;
+        BoxBody firstBody = bodies.get(0);
+        for (int i = 1; i < bodies.size(); i++) {
+            BoxBody body = bodies.get(i);
+            Vector3 positionDelta = body.position.sub(firstBody.position);
+            for (BoxBody.Shape shape : body.getShapes()) {
+                Vector3 newOffset = shape.offset.add(positionDelta);
+                firstBody.getShapes().add(new BoxBody.Shape(shape.size, newOffset, shape.quaternion));
+            }
+        }
+        return firstBody;
     }
 
     private Map<Long, Set<Face>> groupCoplanarFaces(Surface surface) {
