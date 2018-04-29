@@ -8,6 +8,7 @@ import org.briarheart.doomthree.model.Model;
 import org.briarheart.doomthree.model.surface.Surface;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -16,7 +17,7 @@ import java.util.List;
 public abstract class AbstractMap {
     private final String name;
     private final String areaFilter;
-    private final List<Model> models = new ArrayList<>();
+    private final List<Model> models = new LinkedList<>();
     private final List<Light> lights = new ArrayList<>();
     private final Meta meta;
 
@@ -73,10 +74,25 @@ public abstract class AbstractMap {
     }
 
     public void addModel(Model model) {
-        if (StringUtils.isEmpty(areaFilter) || areaFilter.equals(model.getName())) {
-            models.add(model);
-            model.updateMapMeta(meta);
+        models.add(model);
+    }
+
+    public void applyFilter() {
+        if (!StringUtils.isEmpty(areaFilter)) {
+            for (int i = 0; i < models.size(); i++) {
+                Model model = models.get(i);
+                if (model.getName().equals(areaFilter)) {
+                    models.clear();
+                    models.add(model);
+                    return;
+                }
+            }
         }
+    }
+
+    public void updateMapMeta() {
+        for (Model model : models)
+            model.updateMapMeta(meta);
     }
 
     public String toJson() {

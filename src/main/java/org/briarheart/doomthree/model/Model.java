@@ -5,8 +5,10 @@ import org.briarheart.doomthree.AbstractMap;
 import org.briarheart.doomthree.entity.Light;
 import org.briarheart.doomthree.model.surface.Surface;
 import org.briarheart.doomthree.util.BoundingBox;
+import org.briarheart.doomthree.util.Vector3;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -15,7 +17,7 @@ import java.util.regex.Pattern;
 /**
  * @author Roman Chigvintsev
  */
-public class Model {
+public class Model implements Iterable<Surface> {
     private static final Pattern MODEL_HEADER_PATTERN = Pattern
             .compile("model \\{ /\\* name = \\*/ \"(\\w+)\" /\\* numSurfaces = \\*/ (\\d+)");
     private static final Pattern SURFACE_HEADER_PATTERN = Pattern
@@ -28,6 +30,7 @@ public class Model {
     private final AbstractMap map;
 
     private String name;
+    private Vector3 position;
     private int numberOfSurfaces;
 
     public Model(AbstractMap map, String modelBody) {
@@ -39,6 +42,14 @@ public class Model {
         return name;
     }
 
+    public Vector3 getPosition() {
+        return position;
+    }
+
+    public void setPosition(Vector3 position) {
+        this.position = position;
+    }
+
     public BoundingBox getBoundingBox() {
         return boundingBox;
     }
@@ -47,9 +58,20 @@ public class Model {
         return lights;
     }
 
+    public void addSurface(Surface surface) {
+        this.surfaces.add(surface);
+        this.numberOfSurfaces += 1;
+        updateBoundingBox(surface);
+    }
+
     public void updateMapMeta(AbstractMap.Meta meta) {
         for (Surface surface : surfaces)
             meta.getMaterials().add(surface.getMaterialName());
+    }
+
+    @Override
+    public Iterator<Surface> iterator() {
+        return surfaces.iterator();
     }
 
     @Override
@@ -59,7 +81,11 @@ public class Model {
 
     public String toJson() {
         StringBuilder json = new StringBuilder("{");
-        json.append("\"name\":\"").append(name).append("\",").append("\"surfaces\":[");
+        json.append("\"name\":\"").append(name).append("\",");
+        if (position != null)
+            json.append("\"position\":").append(position).append(",");
+        json.append("\"boundingBox\":").append(boundingBox).append(",");
+        json.append("\"surfaces\":[");
         for (int i = 0; i < surfaces.size(); i++) {
             Surface surface = surfaces.get(i);
             if (i > 0)

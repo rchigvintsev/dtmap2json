@@ -13,13 +13,9 @@ public class BoundingBox {
     private Double minZ, maxZ;
 
     public boolean contains(Vector3 point) {
-        if (point.x < minX || point.x > maxX)
-            return false;
-        if (point.y < minY || point.y > maxY)
-            return false;
-        if (point.z < minZ || point.z > maxZ)
-            return false;
-        return true;
+        return checkRange(minX, maxX, point.x)
+                && checkRange(minY, maxY, point.y)
+                && checkRange(minZ, maxZ, point.z);
     }
 
     public boolean contains(BoundingBox other) {
@@ -80,6 +76,15 @@ public class BoundingBox {
             maxZ = boundingBox.maxZ;
     }
 
+    public void add(Vector3 v) {
+        this.minX = this.minX == null ? v.x : this.minX + v.x;
+        this.maxX = this.maxX == null ? v.x : this.maxX + v.x;
+        this.minY = this.minY == null ? v.y : this.minY + v.y;
+        this.maxY = this.maxY == null ? v.y : this.maxY + v.y;
+        this.minZ = this.minZ == null ? v.z : this.minZ + v.z;
+        this.maxZ = this.maxZ == null ? v.z : this.maxZ + v.z;
+    }
+
     public Double getMinX() {
         return minX;
     }
@@ -114,5 +119,27 @@ public class BoundingBox {
 
     public double getDepth() {
         return maxZ - minZ;
+    }
+
+    public String toJson() {
+        return "[" + zeroIfNull(minX) + ","
+                + zeroIfNull(maxX) + ","
+                + zeroIfNull(minY) + ","
+                + zeroIfNull(maxY) + ","
+                + zeroIfNull(minZ) + ","
+                + zeroIfNull(maxZ) + "]";
+    }
+
+    @Override
+    public String toString() {
+        return toJson();
+    }
+
+    private static boolean checkRange(Double min, Double max, double value) {
+        return min != null && value >= min && max != null && value <= max;
+    }
+
+    private static Double zeroIfNull(Double v) {
+        return v == null ? 0.0 : v;
     }
 }

@@ -11,14 +11,12 @@ import java.util.List;
  * @author Roman Chigvintsev
  */
 public class BoxBody extends AbstractBody {
-    public final Vector3 position;
     public final Vector3 normal;
 
     private final List<Shape> shapes = new ArrayList<>();
 
     public BoxBody(Vector3 position, Vector3 normal, PhysicsMaterial material) {
-        super(material);
-        this.position = position;
+        super(position, material);
         this.normal = normal;
     }
 
@@ -39,7 +37,7 @@ public class BoxBody extends AbstractBody {
             json.append(shape.toJson());
         }
         return json.append("],")
-                .append("\"position\":").append(position.toJson())
+                .append("\"position\":").append(getPosition().toJson())
                 .append("}").toString();
     }
 

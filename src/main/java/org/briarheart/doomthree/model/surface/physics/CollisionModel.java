@@ -20,6 +20,10 @@ public class CollisionModel {
         return body == null ? null : new CollisionModel(body);
     }
 
+    public Body getBody() {
+        return body;
+    }
+
     public String toJson() {
         return "{\"bodies\":[" + body.toJson() + "]}";
     }

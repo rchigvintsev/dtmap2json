@@ -63,7 +63,7 @@ public class BoxSetStrategy implements CollisionModelBuildingStrategy {
         BoxBody firstBody = bodies.get(0);
         for (int i = 1; i < bodies.size(); i++) {
             BoxBody body = bodies.get(i);
-            Vector3 positionDelta = body.position.sub(firstBody.position);
+            Vector3 positionDelta = body.getPosition().sub(firstBody.getPosition());
             for (BoxBody.Shape shape : body.getShapes()) {
                 Vector3 newOffset = shape.offset.add(positionDelta);
                 firstBody.getShapes().add(new BoxBody.Shape(shape.size, newOffset, shape.quaternion));
@@ -146,9 +146,9 @@ public class BoxSetStrategy implements CollisionModelBuildingStrategy {
                         continue;
 
                     Matrix4 worldMatrix = new Matrix4();
-                    worldMatrix.compose(body.position, shape.quaternion);
+                    worldMatrix.compose(body.getPosition(), shape.quaternion);
 
-                    Vector3 localOrigin = body.position.worldToLocal(worldMatrix);
+                    Vector3 localOrigin = body.getPosition().worldToLocal(worldMatrix);
                     BoundingBox bb = createBoundingBox(shape.size.toVector2(), localOrigin.toVector2());
 
                     for (int sj = 0; sj < otherBody.getShapes().size(); sj++) {
@@ -156,7 +156,7 @@ public class BoxSetStrategy implements CollisionModelBuildingStrategy {
                         if (otherShape.size.z <= distance)
                             continue;
 
-                        Vector3 otherLocalOrigin = otherBody.position.worldToLocal(worldMatrix);
+                        Vector3 otherLocalOrigin = otherBody.getPosition().worldToLocal(worldMatrix);
                         BoundingBox otherBb = createBoundingBox(otherShape.size.toVector2(), otherLocalOrigin.toVector2());
 
                         if (bb.overlaps(otherBb)) {
@@ -225,8 +225,8 @@ public class BoxSetStrategy implements CollisionModelBuildingStrategy {
     }
 
     private double computeDistanceBetweenBodies(BoxBody body1, BoxBody body2) {
-        Vector3 v1 = body1.position.multiply(body1.normal);
-        Vector3 v2 = body2.position.multiply(body1.normal);
+        Vector3 v1 = body1.getPosition().multiply(body1.normal);
+        Vector3 v2 = body2.getPosition().multiply(body1.normal);
         return v1.distanceTo(v2);
     }
 

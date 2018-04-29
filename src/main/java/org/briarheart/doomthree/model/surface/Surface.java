@@ -32,6 +32,7 @@ public class Surface {
 
     private String name;
     private String materialName;
+    private Vector3 position;
     private int numberOfVertices;
     private Vertex[] vertices;
     private Face[] faces;
@@ -55,12 +56,25 @@ public class Surface {
         return materialName;
     }
 
+    public Vector3 getPosition() {
+        return position;
+    }
+
+    public void setPosition(Vector3 position) {
+        this.position = position;
+        this.boundingBox.add(position);
+    }
+
     public Vertex[] getVertices() {
         return vertices;
     }
 
     public Face[] getFaces() {
         return faces;
+    }
+
+    public CollisionModel getCollisionModel() {
+        return collisionModel;
     }
 
     public BoundingBox getBoundingBox() {
@@ -74,6 +88,8 @@ public class Surface {
 
     public String toJson() {
         StringBuilder json = new StringBuilder("{\"name\":\"").append(name).append("\",");
+        if (position != null)
+            json.append("\"position\":").append(position).append(",");
         json.append("\"geometry\":{\"vertices\":[");
         for (int i = 0; i < vertices.length; i++) {
             Vertex vertex = vertices[i];

@@ -24,6 +24,8 @@ public class EntityFactory {
                     return new InfoPlayerStart(entityBody);
                 case "light":
                     return new Light(entityBody);
+                case "func_static":
+                    return new FuncStatic(entityBody);
             }
         }
         return null;

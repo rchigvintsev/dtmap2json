@@ -35,10 +35,17 @@ public class Main {
         readModels(map);
         readEntities(map);
 
+        map.applyFilter();
+        map.updateMapMeta();
+
         String mapJson = map.toJson();
+        String mapMetaJson = map.getMeta().toJson();
+
         System.out.println(mapJson);
+        System.out.println(mapMetaJson);
+
         Files.write(new File(mapName + ".json").toPath(), mapJson.getBytes());
-        System.out.println(map.getMeta());
+        Files.write(new File(mapName + ".meta.json").toPath(), mapMetaJson.getBytes());
     }
 
     private static void readEntities(AbstractMap map) {
