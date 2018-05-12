@@ -201,7 +201,7 @@ public class Surface {
     }
 
     protected boolean isNeedToCreateCollisionModel(String materialName) {
-        return !isDecal(materialName) && !isSoil(materialName) && !isSkyBox(materialName);
+        return !isDecal(materialName) && !isSoil(materialName) && !isSkybox(materialName);
     }
 
     protected PhysicsMaterial getPhysicsMaterial(String materialName) {

@@ -20,7 +20,7 @@ public class Materials {
         return materialName.contains("skysand");
     }
 
-    public static boolean isSkyBox(String materialName) {
+    public static boolean isSkybox(String materialName) {
         return materialName.contains("skies");
     }
 

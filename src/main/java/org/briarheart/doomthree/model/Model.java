@@ -3,7 +3,9 @@ package org.briarheart.doomthree.model;
 import org.apache.commons.lang3.Validate;
 import org.briarheart.doomthree.AbstractMap;
 import org.briarheart.doomthree.entity.Light;
+import org.briarheart.doomthree.entity.Skybox;
 import org.briarheart.doomthree.model.surface.Surface;
+import org.briarheart.doomthree.model.surface.material.Materials;
 import org.briarheart.doomthree.util.BoundingBox;
 import org.briarheart.doomthree.util.Vector3;
 
@@ -127,8 +129,12 @@ public class Model implements Iterable<Surface> {
                 if (line.startsWith("/* surface")) {
                     Surface surface = readNextSurface(scanner, line);
                     if (surface != null) {
-                        this.surfaces.add(surface);
-                        updateBoundingBox(surface);
+                        if (Materials.isSkybox(surface.getMaterialName()))
+                            new Skybox(surface.getMaterialName()).visit(this.map);
+                        else {
+                            this.surfaces.add(surface);
+                            updateBoundingBox(surface);
+                        }
                     }
                 }
             }

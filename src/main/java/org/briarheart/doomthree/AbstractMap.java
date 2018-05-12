@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.briarheart.doomthree.entity.Entity;
 import org.briarheart.doomthree.entity.InfoPlayerStart;
 import org.briarheart.doomthree.entity.Light;
+import org.briarheart.doomthree.entity.Skybox;
 import org.briarheart.doomthree.model.Model;
 import org.briarheart.doomthree.model.surface.Surface;
 
@@ -22,6 +23,7 @@ public abstract class AbstractMap {
     private final Meta meta;
 
     private InfoPlayerStart infoPlayerStart;
+    private Skybox skybox;
 
     public AbstractMap(String name) {
         this(name, null);
@@ -61,6 +63,14 @@ public abstract class AbstractMap {
         this.infoPlayerStart = infoPlayerStart;
     }
 
+    public Skybox getSkybox() {
+        return skybox;
+    }
+
+    public void setSkybox(Skybox skybox) {
+        this.skybox = skybox;
+    }
+
     public void addEntity(Entity entity) {
         entity.visit(this);
     }
@@ -93,17 +103,20 @@ public abstract class AbstractMap {
     public void updateMapMeta() {
         for (Model model : models)
             model.updateMapMeta(meta);
+        if (skybox != null)
+            skybox.updateMapMeta(meta);
     }
 
     public String toJson() {
         StringBuilder json = new StringBuilder("{");
 
         if (infoPlayerStart != null)
-            json.append(infoPlayerStart);
+            json.append(infoPlayerStart).append(",");
+
+        if (skybox != null)
+            json.append(skybox).append(",");
 
         if (!models.isEmpty()) {
-            if (json.length() > 1)
-                json.append(",");
             json.append("\"areas\":[");
             for (int i = 0; i < models.size(); i++) {
                 Model model = models.get(i);
