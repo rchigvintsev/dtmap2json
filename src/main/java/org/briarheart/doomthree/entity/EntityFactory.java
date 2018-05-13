@@ -26,6 +26,8 @@ public class EntityFactory {
                     return new Light(entityBody);
                 case "func_static":
                     return new FuncStatic(entityBody);
+                case "moveable_base":
+                    return new MoveableBase(entityBody);
             }
         }
         return null;

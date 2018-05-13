@@ -6,12 +6,12 @@ import java.util.regex.Pattern;
 /**
  * @author Roman Chigvintsev
  */
-public class FuncStatic extends MovingEntity {
-    private static final Pattern NAME_PATTERN = Pattern.compile("\"name\"\\s+\"([\\w\\d_]+)\"");
+public class MoveableBase extends MovingEntity {
+    private static final Pattern MODEL_PATTERN = Pattern.compile("\"model\"\\s+\"([\\w\\d_]+)\"");
 
-    private String name;
+    private String model;
 
-    public FuncStatic(String entityBody) {
+    public MoveableBase(String entityBody) {
         super(entityBody);
     }
 
@@ -22,16 +22,16 @@ public class FuncStatic extends MovingEntity {
 
     @Override
     protected String getTargetModelName() {
-        return name;
+        return model;
     }
 
     @Override
     protected void parse(String body) {
         super.parse(body);
-        Matcher matcher = NAME_PATTERN.matcher(body);
+        Matcher matcher = MODEL_PATTERN.matcher(body);
         if (matcher.find())
-            this.name = matcher.group(1);
+            this.model = matcher.group(1);
         else
-            System.err.println("Failed to parse name of \"func_static\"");
+            System.err.println("Failed to parse model of \"moveable_base\"");
     }
 }
