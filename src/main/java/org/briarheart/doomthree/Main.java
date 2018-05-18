@@ -2,9 +2,12 @@ package org.briarheart.doomthree;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.briarheart.doomthree.entity.Entity;
-import org.briarheart.doomthree.entity.EntityFactory;
-import org.briarheart.doomthree.model.Model;
+import org.briarheart.doomthree.map.AbstractMap;
+import org.briarheart.doomthree.map.MapFactory;
+import org.briarheart.doomthree.map.ModelDef;
+import org.briarheart.doomthree.map.area.Area;
+import org.briarheart.doomthree.map.entity.Entity;
+import org.briarheart.doomthree.map.entity.EntityFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,20 +23,26 @@ import java.util.Scanner;
  */
 public class Main {
     public static void main(String[] args) throws IOException {
-        if (args.length == 0) {
-            System.err.println("Usage: java -jar <jar-name>.jar <map-name>");
+        if (args.length < 2) {
+            System.err.println("Usage: java -jar <jar-name>.jar <base-dir> <map-name>");
             System.exit(1);
         }
 
-        String mapName = args[0];
+        String baseDir = args[0];
+        if (baseDir.endsWith("/"))
+            baseDir = baseDir.substring(0, baseDir.length() - 1);
+
+        String mapName = args[1];
+
         String area = null;
-        if (args.length > 1)
-            area = args[1];
+        if (args.length > 2)
+            area = args[2];
 
         AbstractMap map = MapFactory.createMap(mapName, area);
 
-        readModels(map);
-        readEntities(map);
+        readDefs(baseDir, map);
+        readAreas(baseDir, map);
+        readEntities(baseDir, map);
 
         map.applyFilter();
         map.updateMapMeta();
@@ -44,12 +53,12 @@ public class Main {
         System.out.println(mapJson);
         System.out.println(mapMetaJson);
 
-        Files.write(new File(mapName + ".json").toPath(), mapJson.getBytes());
-        Files.write(new File(mapName + ".meta.json").toPath(), mapMetaJson.getBytes());
+        Files.write(new File(baseDir + "/maps/" + mapName + ".json").toPath(), mapJson.getBytes());
+        Files.write(new File(baseDir + "/maps/" + mapName + ".meta.json").toPath(), mapMetaJson.getBytes());
     }
 
-    private static void readEntities(AbstractMap map) {
-        try (Scanner scanner = new Scanner(new FileInputStream(map.getName() + ".map"))) {
+    private static void readEntities(String baseDir, AbstractMap map) {
+        try (Scanner scanner = new Scanner(new FileInputStream(baseDir + "/maps/" + map.getName() + ".map"))) {
             MutableInt lineNumber = new MutableInt();
 
             while (scanner.hasNextLine()) {
@@ -61,7 +70,7 @@ public class Main {
 
                 if (line.equals("{")) {
                     int startedAt = lineNumber.intValue();
-                    Entity entity = readNextEntity(scanner, lineNumber);
+                    Entity entity = readNextEntity(scanner, lineNumber, map);
                     if (entity == null)
                         System.err.println("Unrecognized entity started at line " + startedAt);
                     else
@@ -74,7 +83,7 @@ public class Main {
         }
     }
 
-    private static Entity readNextEntity(Scanner scanner, MutableInt lineNumber) {
+    private static Entity readNextEntity(Scanner scanner, MutableInt lineNumber, AbstractMap map) {
         StringBuilder entityBody = new StringBuilder();
         Deque<Character> openedBraces = new LinkedList<>();
 
@@ -89,7 +98,7 @@ public class Main {
                 openedBraces.push('{');
             else if (line.equals("}")) {
                 if (openedBraces.isEmpty())
-                    return EntityFactory.createEntity(entityBody.toString());
+                    return EntityFactory.createEntity(entityBody.toString(), map);
                 openedBraces.pop();
             }
 
@@ -100,8 +109,35 @@ public class Main {
         return null;
     }
 
-    private static void readModels(AbstractMap map) {
-        try (Scanner scanner = new Scanner(new FileInputStream(map.getName() + ".proc"))) {
+    private static void readDefs(String baseDir, AbstractMap map) {
+        String[] split = map.getName().split("/");
+        File defFile = new File(baseDir + "/def/map_" + split[split.length - 1] + ".def");
+        if (defFile.exists())
+            try (Scanner scanner = new Scanner(new FileInputStream(defFile))) {
+                MutableInt lineNumber = new MutableInt();
+
+                while (scanner.hasNextLine()) {
+                    String line = scanner.nextLine().trim();
+
+                    if (StringUtils.isEmpty(line) || line.startsWith("//"))
+                        continue;
+
+                    if (line.startsWith("model ")) {
+                        int startedAt = lineNumber.intValue();
+                        ModelDef modelDef = readNextModelDef(scanner, line, lineNumber, map);
+                        if (modelDef == null)
+                            System.err.println("Unrecognized model def started at line " + startedAt);
+                        else
+                            map.getModelDefs().add(modelDef);
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+    }
+
+    private static void readAreas(String baseDir, AbstractMap map) {
+        try (Scanner scanner = new Scanner(new FileInputStream(baseDir + "/maps/" + map.getName() + ".proc"))) {
             MutableInt lineNumber = new MutableInt();
 
             while (scanner.hasNextLine()) {
@@ -112,11 +148,11 @@ public class Main {
 
                 if (line.startsWith("model {")) {
                     int startedAt = lineNumber.intValue();
-                    Model model = readNextModel(scanner, line, lineNumber, map);
-                    if (model == null)
-                        System.err.println("Unrecognized model started at line " + startedAt);
+                    Area area = readNextArea(scanner, line, lineNumber, map);
+                    if (area == null)
+                        System.err.println("Unrecognized area started at line " + startedAt);
                     else
-                        map.addModel(model);
+                        map.getAreas().add(area);
                 }
             }
         } catch (FileNotFoundException e) {
@@ -124,8 +160,8 @@ public class Main {
         }
     }
 
-    private static Model readNextModel(Scanner scanner, String header, MutableInt lineNumber, AbstractMap map) {
-        StringBuilder modelBody = new StringBuilder(header);
+    private static ModelDef readNextModelDef(Scanner scanner, String header, MutableInt lineNumber, AbstractMap map) {
+        StringBuilder modelDefBody = new StringBuilder(header);
         Deque<Character> openedBraces = new LinkedList<>();
         openedBraces.push('{'); // Brace in header
 
@@ -137,13 +173,37 @@ public class Main {
 
             if (line.equals("}")) {
                 openedBraces.pop();
-                if (openedBraces.isEmpty()) {
-                    return map.newModel(modelBody.toString());
-                }
+                if (openedBraces.isEmpty())
+                    return map.newModelDef(modelDefBody.toString());
             } else if (line.contains("{"))
                 openedBraces.push('{');
 
-            modelBody.append("\n").append(line);
+            modelDefBody.append("\n").append(line);
+        }
+
+        System.err.println("Unexpected end of file");
+        return null;
+    }
+
+    private static Area readNextArea(Scanner scanner, String header, MutableInt lineNumber, AbstractMap map) {
+        StringBuilder areaBody = new StringBuilder(header);
+        Deque<Character> openedBraces = new LinkedList<>();
+        openedBraces.push('{'); // Brace in header
+
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine().trim();
+
+            if (StringUtils.isEmpty(line) || line.startsWith("//"))
+                continue;
+
+            if (line.equals("}")) {
+                openedBraces.pop();
+                if (openedBraces.isEmpty())
+                    return map.newArea(areaBody.toString());
+            } else if (line.contains("{"))
+                openedBraces.push('{');
+
+            areaBody.append("\n").append(line);
         }
 
         System.err.println("Unexpected end of file");

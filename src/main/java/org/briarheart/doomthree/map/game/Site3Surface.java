@@ -1,14 +1,14 @@
 package org.briarheart.doomthree.map.game;
 
-import org.briarheart.doomthree.model.Model;
-import org.briarheart.doomthree.model.surface.Surface;
+import org.briarheart.doomthree.map.area.Area;
+import org.briarheart.doomthree.map.area.surface.Surface;
 
 /**
  * @author Roman Chigvintsev
  */
 public class Site3Surface extends Surface {
-    public Site3Surface(Model model, String surfaceBody) {
-        super(model, surfaceBody);
+    public Site3Surface(Area area, String surfaceBody) {
+        super(area, surfaceBody);
     }
 
     @Override

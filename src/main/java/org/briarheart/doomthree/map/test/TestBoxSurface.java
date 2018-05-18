@@ -1,15 +1,15 @@
 package org.briarheart.doomthree.map.test;
 
-import org.briarheart.doomthree.model.Model;
-import org.briarheart.doomthree.model.surface.Surface;
-import org.briarheart.doomthree.model.surface.physics.PhysicsMaterial;
+import org.briarheart.doomthree.map.area.Area;
+import org.briarheart.doomthree.map.area.surface.Surface;
+import org.briarheart.doomthree.map.area.surface.physics.PhysicsMaterial;
 
 /**
  * @author Roman Chigvintsev
  */
 public class TestBoxSurface extends Surface {
-    public TestBoxSurface(Model model, String surfaceBody) {
-        super(model, surfaceBody);
+    public TestBoxSurface(Area area, String surfaceBody) {
+        super(area, surfaceBody);
     }
 
     @Override

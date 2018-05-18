@@ -1,8 +1,8 @@
 package org.briarheart.doomthree.map.game;
 
-import org.briarheart.doomthree.AbstractMap;
-import org.briarheart.doomthree.model.Model;
-import org.briarheart.doomthree.model.surface.Surface;
+import org.briarheart.doomthree.map.AbstractMap;
+import org.briarheart.doomthree.map.area.Area;
+import org.briarheart.doomthree.map.area.surface.Surface;
 
 /**
  * @author Roman Chigvintsev
@@ -15,7 +15,7 @@ public class Site3 extends AbstractMap {
     }
 
     @Override
-    public Surface newSurface(Model model, String surfaceBody) {
-        return new Site3Surface(model, surfaceBody);
+    public Surface newSurface(Area area, String surfaceBody) {
+        return new Site3Surface(area, surfaceBody);
     }
 }

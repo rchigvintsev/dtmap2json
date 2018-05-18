@@ -1,8 +1,8 @@
 package org.briarheart.doomthree.map.test;
 
-import org.briarheart.doomthree.AbstractMap;
-import org.briarheart.doomthree.model.Model;
-import org.briarheart.doomthree.model.surface.Surface;
+import org.briarheart.doomthree.map.AbstractMap;
+import org.briarheart.doomthree.map.area.Area;
+import org.briarheart.doomthree.map.area.surface.Surface;
 
 /**
  * @author Roman Chigvintsev
@@ -15,7 +15,7 @@ public class TestBox extends AbstractMap {
     }
 
     @Override
-    public Surface newSurface(Model model, String surfaceBody) {
-        return new TestBoxSurface(model, surfaceBody);
+    public Surface newSurface(Area area, String surfaceBody) {
+        return new TestBoxSurface(area, surfaceBody);
     }
 }
