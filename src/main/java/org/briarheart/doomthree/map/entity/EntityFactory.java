@@ -1,7 +1,7 @@
 package org.briarheart.doomthree.map.entity;
 
 import org.briarheart.doomthree.map.AbstractMap;
-import org.briarheart.doomthree.map.ModelDef;
+import org.briarheart.doomthree.map.Md5ModelDef;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,16 +32,16 @@ public class EntityFactory {
                 case "moveable_base":
                     return new MoveableBase(entityBody);
                 default:
-                    ModelDef modelDef = findModelDef(map, className);
+                    Md5ModelDef modelDef = findMd5ModelDef(map, className);
                     if (modelDef != null)
-                        return new Model(entityBody, modelDef);
+                        return new Md5Model(entityBody, modelDef);
             }
         }
         return null;
     }
 
-    private static ModelDef findModelDef(AbstractMap map, String name) {
-        for (ModelDef modelDef : map.getModelDefs())
+    private static Md5ModelDef findMd5ModelDef(AbstractMap map, String name) {
+        for (Md5ModelDef modelDef : map.getMd5ModelDefs())
             if (modelDef.getName().equals(name))
                 return modelDef;
         return null;

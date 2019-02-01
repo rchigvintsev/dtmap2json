@@ -24,16 +24,19 @@ public class Light extends Entity {
     }
 
     @Override
-    public void visit(AbstractMap map) {
-        boolean found = false;
+    public boolean visit(AbstractMap map, boolean warnIfFailed) {
         for (Area area : map.getAreas())
             if (area.getBoundingBox().contains(position)) {
                 area.getLights().add(this);
-                found = true;
+                return true;
             }
 
-        if (!found && StringUtils.isEmpty(map.getAreaFilter()))
+        if (StringUtils.isEmpty(map.getAreaFilter())) {
             map.getLights().add(this);
+            return true;
+        }
+
+        return false;
     }
 
     @Override

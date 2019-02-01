@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 /**
  * @author Roman Chigvintsev
  */
-public class ModelDef {
+public class Md5ModelDef {
     private static final Pattern MODEL_DEF_HEADER_PATTERN = Pattern.compile("model (\\w+) \\{");
 
     private final Map<String, String> animations = new HashMap<>();
@@ -20,7 +20,7 @@ public class ModelDef {
     private String name;
     private String mesh;
 
-    public ModelDef(String modelBody) {
+    public Md5ModelDef(String modelBody) {
         parse(modelBody);
     }
 

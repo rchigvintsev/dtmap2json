@@ -16,7 +16,7 @@ import java.util.*;
 public abstract class AbstractMap {
     private final String name;
     private final String areaFilter;
-    private final List<ModelDef> modelDefs = new LinkedList<>();
+    private final List<Md5ModelDef> md5ModelDefs = new LinkedList<>();
     private final List<Area> areas = new LinkedList<>();
     private final List<Light> lights = new ArrayList<>();
     private final Meta meta;
@@ -46,8 +46,8 @@ public abstract class AbstractMap {
         return areaFilter;
     }
 
-    public List<ModelDef> getModelDefs() {
-        return modelDefs;
+    public List<Md5ModelDef> getMd5ModelDefs() {
+        return md5ModelDefs;
     }
 
     public List<Area> getAreas() {
@@ -74,12 +74,12 @@ public abstract class AbstractMap {
         this.skybox = skybox;
     }
 
-    public void addEntity(Entity entity) {
-        entity.visit(this);
+    public boolean addEntity(Entity entity, boolean warnIfFailed) {
+        return entity.visit(this, warnIfFailed);
     }
 
-    public ModelDef newModelDef(String body) {
-        return new ModelDef(body);
+    public Md5ModelDef newMd5ModelDef(String body) {
+        return new Md5ModelDef(body);
     }
 
     public Area newArea(String body) {

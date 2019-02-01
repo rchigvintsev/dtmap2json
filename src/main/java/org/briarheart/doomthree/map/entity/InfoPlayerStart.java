@@ -13,9 +13,14 @@ public class InfoPlayerStart extends Entity {
         super(entityBody);
     }
 
+    public Vector3 getPosition() {
+        return position;
+    }
+
     @Override
-    public void visit(AbstractMap map) {
+    public boolean visit(AbstractMap map, boolean warnIfFailed) {
         map.setInfoPlayerStart(this);
+        return true;
     }
 
     @Override

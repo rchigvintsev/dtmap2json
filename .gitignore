@@ -2,4 +2,5 @@
 /.gradle
 /out
 /game
-/testmaps
+/maps
+/def

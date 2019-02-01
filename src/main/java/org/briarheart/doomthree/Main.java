@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.briarheart.doomthree.map.AbstractMap;
 import org.briarheart.doomthree.map.MapFactory;
-import org.briarheart.doomthree.map.ModelDef;
+import org.briarheart.doomthree.map.Md5ModelDef;
 import org.briarheart.doomthree.map.area.Area;
 import org.briarheart.doomthree.map.entity.Entity;
 import org.briarheart.doomthree.map.entity.EntityFactory;
@@ -14,9 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * @author Roman Chigvintsev
@@ -58,6 +56,10 @@ public class Main {
     }
 
     private static void readEntities(String baseDir, AbstractMap map) {
+        // Some entities could not be placed in map until other entities are read. For examples when area filter is
+        // set some models can be placed only after player position is defined.
+        List<Entity> pendingEntities = new ArrayList<>();
+
         try (Scanner scanner = new Scanner(new FileInputStream(baseDir + "/maps/" + map.getName() + ".map"))) {
             MutableInt lineNumber = new MutableInt();
 
@@ -73,14 +75,20 @@ public class Main {
                     Entity entity = readNextEntity(scanner, lineNumber, map);
                     if (entity == null)
                         System.err.println("Unrecognized entity started at line " + startedAt);
-                    else
-                        map.addEntity(entity);
+                    else {
+                        if (!map.addEntity(entity, false))
+                            pendingEntities.add(entity);
+                    }
                 } else if (line.equals("}"))
                     System.err.println("Unpaired closing curly brace is found at line " + lineNumber);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
+        for (Entity entity : pendingEntities)
+            // It's a last chance for entity to be placed in map
+            map.addEntity(entity, true);
     }
 
     private static Entity readNextEntity(Scanner scanner, MutableInt lineNumber, AbstractMap map) {
@@ -124,11 +132,11 @@ public class Main {
 
                     if (line.startsWith("model ")) {
                         int startedAt = lineNumber.intValue();
-                        ModelDef modelDef = readNextModelDef(scanner, line, lineNumber, map);
+                        Md5ModelDef modelDef = readNextModelDef(scanner, line, lineNumber, map);
                         if (modelDef == null)
                             System.err.println("Unrecognized model def started at line " + startedAt);
                         else
-                            map.getModelDefs().add(modelDef);
+                            map.getMd5ModelDefs().add(modelDef);
                     }
                 }
             } catch (FileNotFoundException e) {
@@ -160,7 +168,7 @@ public class Main {
         }
     }
 
-    private static ModelDef readNextModelDef(Scanner scanner, String header, MutableInt lineNumber, AbstractMap map) {
+    private static Md5ModelDef readNextModelDef(Scanner scanner, String header, MutableInt lineNumber, AbstractMap map) {
         StringBuilder modelDefBody = new StringBuilder(header);
         Deque<Character> openedBraces = new LinkedList<>();
         openedBraces.push('{'); // Brace in header
@@ -174,7 +182,7 @@ public class Main {
             if (line.equals("}")) {
                 openedBraces.pop();
                 if (openedBraces.isEmpty())
-                    return map.newModelDef(modelDefBody.toString());
+                    return map.newMd5ModelDef(modelDefBody.toString());
             } else if (line.contains("{"))
                 openedBraces.push('{');
 

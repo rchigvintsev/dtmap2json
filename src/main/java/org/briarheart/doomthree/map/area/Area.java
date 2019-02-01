@@ -4,8 +4,8 @@ import org.apache.commons.lang3.Validate;
 import org.briarheart.doomthree.map.AbstractMap;
 import org.briarheart.doomthree.map.Materials;
 import org.briarheart.doomthree.map.area.surface.Surface;
+import org.briarheart.doomthree.map.entity.AbstractModel;
 import org.briarheart.doomthree.map.entity.Light;
-import org.briarheart.doomthree.map.entity.Model;
 import org.briarheart.doomthree.map.entity.Skybox;
 import org.briarheart.doomthree.util.BoundingBox;
 import org.briarheart.doomthree.util.Vector3;
@@ -24,12 +24,12 @@ public class Area implements Iterable<Surface> {
     private static final Pattern MODEL_HEADER_PATTERN = Pattern
             .compile("model \\{ /\\* name = \\*/ \"(\\w+)\" /\\* numSurfaces = \\*/ (\\d+)");
     private static final Pattern SURFACE_HEADER_PATTERN = Pattern
-            .compile("/\\* surface \\d+ \\*/ \\{ \"([\\w/_]+)\"");
+            .compile("/\\* surface \\d+ \\*/ \\{ \"([\\w/]+)\"");
 
     private final BoundingBox boundingBox = new BoundingBox();
     private final List<Surface> surfaces = new ArrayList<>();
     private final List<Light> lights = new ArrayList<>();
-    private final List<Model> models = new ArrayList<>();
+    private final List<AbstractModel> models = new ArrayList<>();
 
     private final AbstractMap map;
 
@@ -68,14 +68,14 @@ public class Area implements Iterable<Surface> {
         updateBoundingBox(surface);
     }
 
-    public void addModel(Model model) {
+    public void addModel(AbstractModel model) {
         this.models.add(model);
     }
 
     public void updateMapMeta(AbstractMap.Meta meta) {
         for (Surface surface : surfaces)
             meta.getMaterials().add(surface.getMaterialName());
-        for (Model model : models) {
+        for (AbstractModel model : models) {
             meta.getModels().add(model.getMesh());
             meta.getAnimations().addAll(model.getAnimations().values());
         }
@@ -118,7 +118,7 @@ public class Area implements Iterable<Surface> {
         if (!models.isEmpty()) {
             json.append(",\"models\":[");
             for (int i = 0; i < models.size(); i++) {
-                Model model = models.get(i);
+                AbstractModel model = models.get(i);
                 if (i > 0)
                     json.append(",");
                 json.append(model);
@@ -150,7 +150,7 @@ public class Area implements Iterable<Surface> {
                     Surface surface = readNextSurface(scanner, line);
                     if (surface != null) {
                         if (Materials.isSkybox(surface.getMaterialName()))
-                            new Skybox(surface.getMaterialName()).visit(this.map);
+                            new Skybox(surface.getMaterialName()).visit(this.map, true);
                         else {
                             this.surfaces.add(surface);
                             updateBoundingBox(surface);
@@ -181,10 +181,6 @@ public class Area implements Iterable<Surface> {
 
     private void updateBoundingBox(Surface surface) {
         boundingBox.checkBoundaries(surface.getBoundingBox());
-    }
-
-    private void updateBoundingBox(Model model) {
-        boundingBox.checkBoundaries(model.getBoundingBox());
     }
 
     private void checkNumberOfSurfaces() {

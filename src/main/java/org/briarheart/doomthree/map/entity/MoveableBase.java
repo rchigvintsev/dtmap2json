@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
  * @author Roman Chigvintsev
  */
 public class MoveableBase extends MovingEntity {
-    private static final Pattern MODEL_PATTERN = Pattern.compile("\"model\"\\s+\"([\\w\\d_]+)\"");
+    private static final Pattern MODEL_PATTERN = Pattern.compile("\"model\"\\s+\"(\\w+)\"");
 
     private String model;
 

@@ -16,7 +16,7 @@ public abstract class Entity {
         parse(entityBody);
     }
 
-    public abstract void visit(AbstractMap map);
+    public abstract boolean visit(AbstractMap map, boolean warnIfFailed);
 
     @Override
     public String toString() {

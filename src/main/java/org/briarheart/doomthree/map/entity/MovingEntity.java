@@ -19,12 +19,13 @@ public abstract class MovingEntity extends Entity {
     }
 
     @Override
-    public void visit(AbstractMap map) {
+    public boolean visit(AbstractMap map, boolean warnIfFailed) {
         String modelName = getTargetAreaName();
         int areaIndex = findArea(map, modelName);
         if (areaIndex == -1) {
-            System.err.println("Area with name \"" + modelName + "\" is not found");
-            return;
+            if (warnIfFailed)
+                System.err.println("Area with name \"" + modelName + "\" is not found");
+            return false;
         }
 
         List<Area> areas = map.getAreas();
@@ -38,10 +39,12 @@ public abstract class MovingEntity extends Entity {
                         collisionModel.getBody().setPosition(position);
                     otherArea.addSurface(surface);
                 }
-                return;
+                return true;
             }
 
-        System.err.println("Could not find area to accommodate another area with name \"" + area.getName() + "\"");
+        if (warnIfFailed)
+            System.err.println("Could not find area to accommodate another area with name \"" + area.getName() + "\"");
+        return false;
     }
 
     protected abstract String getTargetAreaName();

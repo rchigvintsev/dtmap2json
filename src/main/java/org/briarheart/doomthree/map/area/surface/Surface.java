@@ -23,7 +23,7 @@ import static org.briarheart.doomthree.map.Materials.*;
  */
 public class Surface {
     private static final Pattern HEADER_PATTERN = Pattern
-            .compile("/\\* (surface \\d+) \\*/ \\{ \"([\\w/_]+)\" /\\* numVerts = \\*/ (\\d+)");
+            .compile("/\\* (surface \\d+) \\*/ \\{ \"([\\w/]+)\" /\\* numVerts = \\*/ (\\d+)");
 
     private final static CollisionModelBuildingStrategy BOX_SET_STRATEGY = new BoxSetStrategy();
     private final static CollisionModelBuildingStrategy TRIMESH_STRATEGY = new TrimeshStrategy();
