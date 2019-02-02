@@ -8,6 +8,7 @@ import org.briarheart.doomthree.util.Vector3;
  */
 public class InfoPlayerStart extends Entity {
     private Vector3 position;
+    private Vector3 rotation;
 
     public InfoPlayerStart(String entityBody) {
         super(entityBody);
@@ -15,6 +16,10 @@ public class InfoPlayerStart extends Entity {
 
     public Vector3 getPosition() {
         return position;
+    }
+
+    public void setRotation(Vector3 rotation) {
+        this.rotation = rotation;
     }
 
     @Override
@@ -26,10 +31,11 @@ public class InfoPlayerStart extends Entity {
     @Override
     protected void parse(String body) {
         position = parseOrigin(body);
+        rotation = new Vector3();
     }
 
     @Override
     public String toJson() {
-        return "\"player\":{\"position\":" + position + "}";
+        return "\"player\":{\"position\":" + position + ",\"rotation\":" + rotation + "}";
     }
 }
