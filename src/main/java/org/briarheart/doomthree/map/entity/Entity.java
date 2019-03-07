@@ -10,12 +10,18 @@ import java.util.regex.Pattern;
  * @author Roman Chigvintsev
  */
 public abstract class Entity {
+    public static final Pattern NAME_PATTERN = Pattern.compile("\"name\"\\s+\"(\\w+)\"");
+    public static final Pattern MODEL_PATTERN = Pattern.compile("\"model\"\\s+\"([\\w/.]+)\"");
+
     private static final Pattern ORIGIN_PATTERN = Pattern.compile("\"origin\"\\s+\"([0-9 -]+)\"");
 
     public Entity(String entityBody) {
         parse(entityBody);
     }
 
+    /**
+     * @return {@code true} if entity is successfully added to the map, {@code false} otherwise
+     */
     public abstract boolean visit(AbstractMap map, boolean warnIfFailed);
 
     @Override

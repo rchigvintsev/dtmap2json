@@ -31,6 +31,8 @@ public class EntityFactory {
                     return new FuncStatic(entityBody);
                 case "moveable_base":
                     return new MoveableBase(entityBody);
+                case "func_door":
+                    return new FuncDoor(entityBody);
                 default:
                     Md5ModelDef modelDef = findMd5ModelDef(map, className);
                     if (modelDef != null)

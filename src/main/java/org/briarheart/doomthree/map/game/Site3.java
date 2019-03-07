@@ -4,7 +4,7 @@ import org.briarheart.doomthree.map.AbstractMap;
 import org.briarheart.doomthree.map.area.Area;
 import org.briarheart.doomthree.map.area.surface.Surface;
 import org.briarheart.doomthree.map.entity.InfoPlayerStart;
-import org.briarheart.doomthree.util.Converters;
+import org.briarheart.doomthree.util.Angles;
 import org.briarheart.doomthree.util.Vector3;
 
 /**
@@ -25,6 +25,6 @@ public class Site3 extends AbstractMap {
     @Override
     public void setInfoPlayerStart(InfoPlayerStart infoPlayerStart) {
         super.setInfoPlayerStart(infoPlayerStart);
-        infoPlayerStart.setRotation(new Vector3(0, Converters.degreesToRadians(180), 0));
+        infoPlayerStart.setRotation(new Vector3(0, Angles.degreesToRadians(180), 0));
     }
 }

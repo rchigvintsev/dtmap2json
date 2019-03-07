@@ -3,8 +3,8 @@ package org.briarheart.doomthree.util;
 /**
  * @author Roman Chigvintsev
  */
-public abstract class Converters {
-    private Converters() {
+public abstract class Angles {
+    private Angles() {
         //no instance
     }
 

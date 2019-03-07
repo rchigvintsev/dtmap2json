@@ -17,6 +17,34 @@ public class Matrix4 {
             0, 0, 0, 1
     };
 
+    public static Matrix4 fromString(String s) {
+        String[] split = s.split(" ");
+
+        double n11 = Double.parseDouble(split[0]);
+        double n12 = Double.parseDouble(split[3]);
+        double n13 = Double.parseDouble(split[6]);
+        double n14 = 0.0d;
+
+        double n21 = Double.parseDouble(split[1]);
+        double n22 = Double.parseDouble(split[4]);
+        double n23 = Double.parseDouble(split[7]);
+        double n24 = 0.0d;
+
+        double n31 = Double.parseDouble(split[2]);
+        double n32 = Double.parseDouble(split[5]);
+        double n33 = Double.parseDouble(split[8]);
+        double n34 = 0.0d;
+
+        double n41 = 0.0d;
+        double n42 = 0.0d;
+        double n43 = 0.0d;
+        double n44 = 1.0d;
+
+        Matrix4 matrix = new Matrix4();
+        matrix.set(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44);
+        return matrix;
+    }
+
     public Matrix4 identity() {
         set(
                 1, 0, 0, 0,
@@ -24,42 +52,6 @@ public class Matrix4 {
                 0, 0, 1, 0,
                 0, 0, 0, 1
         );
-        return this;
-    }
-
-    private Matrix4 set(double n11,
-                        double n12,
-                        double n13,
-                        double n14,
-                        double n21,
-                        double n22,
-                        double n23,
-                        double n24,
-                        double n31,
-                        double n32,
-                        double n33,
-                        double n34,
-                        double n41,
-                        double n42,
-                        double n43,
-                        double n44) {
-        double[] te = elements;
-        te[0] = n11;
-        te[4] = n12;
-        te[8] = n13;
-        te[12] = n14;
-        te[1] = n21;
-        te[5] = n22;
-        te[9] = n23;
-        te[13] = n24;
-        te[2] = n31;
-        te[6] = n32;
-        te[10] = n33;
-        te[14] = n34;
-        te[3] = n41;
-        te[7] = n42;
-        te[11] = n43;
-        te[15] = n44;
         return this;
     }
 
@@ -155,44 +147,32 @@ public class Matrix4 {
         return this;
     }
 
-    private void makeRotationFromQuaternion(Quaternion q) {
-        double[] te = elements;
+    /**
+     * Code of this method is kindly borrowed from
+     * <a href="https://github.com/id-Software/DOOM-3">DOOM-3 GitHub repository</a>
+     */
+    public Vector3 toAngles()  {
+        double sp = elements[2];
 
-        double x = q.getX(), y = q.getY(), z = q.getZ(), w = q.getW();
-        double x2 = x + x, y2 = y + y, z2 = z + z;
-        double xx = x * x2, xy = x * y2, xz = x * z2;
-        double yy = y * y2, yz = y * z2, zz = z * z2;
-        double wx = w * x2, wy = w * y2, wz = w * z2;
+        if (sp > 1.0f)
+            sp = 1.0f;
+        else if (sp < -1.0f)
+            sp = -1.0f;
 
-        te[0] = 1 - (yy + zz);
-        te[4] = xy - wz;
-        te[8] = xz + wy;
+        double theta = - Math.asin( sp );
+        double cp = Math.cos(theta);
 
-        te[1] = xy + wz;
-        te[5] = 1 - (xx + zz);
-        te[9] = yz - wx;
-
-        te[2] = xz - wy;
-        te[6] = yz + wx;
-        te[10] = 1 - (xx + yy);
-
-        // last column
-        te[3] = 0;
-        te[7] = 0;
-        te[11] = 0;
-
-        // bottom row
-        te[12] = 0;
-        te[13] = 0;
-        te[14] = 0;
-        te[15] = 1;
-    }
-
-    private void setPosition(Vector3 v) {
-        double[] te = elements;
-        te[12] = v.x;
-        te[13] = v.y;
-        te[14] = v.z;
+        double pitch, yaw, roll;
+        if (cp > 8192.0f * 1.192092896e-07f) {
+            pitch = theta;
+            yaw = Math.atan2(elements[1], elements[0]);
+            roll = Math.atan2(elements[6], elements[10]);
+        } else {
+            pitch = theta;
+            yaw = -Math.atan2(elements[4], elements[5]);
+            roll = 0;
+        }
+        return new Vector3(pitch, roll, yaw);
     }
 
     @Override
@@ -214,5 +194,81 @@ public class Matrix4 {
     @Override
     public int hashCode() {
         return Arrays.hashCode(elements);
+    }
+
+    private Matrix4 set(double n11,
+                        double n12,
+                        double n13,
+                        double n14,
+                        double n21,
+                        double n22,
+                        double n23,
+                        double n24,
+                        double n31,
+                        double n32,
+                        double n33,
+                        double n34,
+                        double n41,
+                        double n42,
+                        double n43,
+                        double n44) {
+        double[] te = elements;
+        te[0] = n11;
+        te[4] = n12;
+        te[8] = n13;
+        te[12] = n14;
+        te[1] = n21;
+        te[5] = n22;
+        te[9] = n23;
+        te[13] = n24;
+        te[2] = n31;
+        te[6] = n32;
+        te[10] = n33;
+        te[14] = n34;
+        te[3] = n41;
+        te[7] = n42;
+        te[11] = n43;
+        te[15] = n44;
+        return this;
+    }
+
+    private void makeRotationFromQuaternion(Quaternion q) {
+        double[] te = elements;
+
+        double x = q.getX(), y = q.getY(), z = q.getZ(), w = q.getW();
+        double x2 = x + x, y2 = y + y, z2 = z + z;
+        double xx = x * x2, xy = x * y2, xz = x * z2;
+        double yy = y * y2, yz = y * z2, zz = z * z2;
+        double wx = w * x2, wy = w * y2, wz = w * z2;
+
+        te[0] = 1 - (yy + zz);
+        te[4] = xy - wz;
+        te[8] = xz + wy;
+
+        te[1] = xy + wz;
+        te[5] = 1 - (xx + zz);
+        te[9] = yz - wx;
+
+        te[2] = xz - wy;
+        te[6] = yz + wx;
+        te[10] = 1 - (xx + yy);
+
+        // Last column
+        te[3] = 0;
+        te[7] = 0;
+        te[11] = 0;
+
+        // Bottom row
+        te[12] = 0;
+        te[13] = 0;
+        te[14] = 0;
+        te[15] = 1;
+    }
+
+    private void setPosition(Vector3 v) {
+        double[] te = elements;
+        te[12] = v.x;
+        te[13] = v.y;
+        te[14] = v.z;
     }
 }

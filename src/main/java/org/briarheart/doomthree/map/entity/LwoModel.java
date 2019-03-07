@@ -2,6 +2,7 @@ package org.briarheart.doomthree.map.entity;
 
 import org.briarheart.doomthree.map.AbstractMap;
 import org.briarheart.doomthree.map.area.Area;
+import org.briarheart.doomthree.util.Matrix4;
 import org.briarheart.doomthree.util.Vector3;
 
 import java.util.Collections;
@@ -15,13 +16,19 @@ import java.util.regex.Pattern;
 public class LwoModel extends AbstractModel {
     private static final Pattern NAME_PATTERN = Pattern.compile("\"name\"\\s+\"(\\w+)\"");
     private static final Pattern MODEL_PATTERN = Pattern.compile("\"model\"\\s+\"([\\w/.]+)\"");
+    private static final Pattern ROTATION_PATTERN = Pattern.compile("\"rotation\"\\s+\"([0-9 -.e]+)\"");
 
     private String name;
     private String mesh;
     private Vector3 position;
+    private Vector3 rotation;
 
     public LwoModel(String modelBody) {
         super(modelBody);
+    }
+
+    public static boolean isLwoModel(String modelName) {
+        return modelName.toLowerCase().endsWith(".lwo");
     }
 
     @Override
@@ -51,7 +58,8 @@ public class LwoModel extends AbstractModel {
     public String toJson() {
         return "{"
                 + "\"name\":\"" + mesh + "\","
-                + "\"position\":" + position
+                + "\"position\":" + position + ","
+                + "\"rotation\":" + rotation
                 + "}";
     }
 
@@ -66,5 +74,15 @@ public class LwoModel extends AbstractModel {
         if (modelMatcher.find())
             mesh = modelMatcher.group(1);
         position = parseOrigin(body);
+        rotation = parseRotation(body);
+    }
+
+    private Vector3 parseRotation(String s) {
+        Matcher matcher = ROTATION_PATTERN.matcher(s);
+        if (matcher.find()) {
+            Matrix4 rotationMatrix = Matrix4.fromString(matcher.group(1));
+            return rotationMatrix.toAngles();
+        }
+        return new Vector3();
     }
 }

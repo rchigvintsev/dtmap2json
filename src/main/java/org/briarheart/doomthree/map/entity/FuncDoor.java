@@ -5,22 +5,18 @@ import org.briarheart.doomthree.map.AbstractMap;
 
 import java.util.regex.Matcher;
 
-/**
- * @author Roman Chigvintsev
- */
-public class FuncStatic extends MovingEntity {
-    private String name;
+public class FuncDoor extends Entity {
     private LwoModel lwoModel;
 
-    public FuncStatic(String entityBody) {
+    public FuncDoor(String entityBody) {
         super(entityBody);
     }
 
     @Override
     public boolean visit(AbstractMap map, boolean warnIfFailed) {
-        if (lwoModel == null)
-            return super.visit(map, warnIfFailed);
-        return lwoModel.visit(map, warnIfFailed);
+        if (lwoModel != null)
+            return lwoModel.visit(map, warnIfFailed);
+        return true;
     }
 
     @Override
@@ -29,23 +25,22 @@ public class FuncStatic extends MovingEntity {
     }
 
     @Override
-    protected String getTargetAreaName() {
-        return name;
-    }
-
-    @Override
     protected void parse(String body) {
-        super.parse(body);
+        String name = null;
         Matcher nameMatcher = NAME_PATTERN.matcher(body);
         if (nameMatcher.find())
-            this.name = nameMatcher.group(1);
+            name = nameMatcher.group(1);
         else
             System.err.println("Failed to parse name of \"func_static\"");
+
         Matcher modelMatcher = MODEL_PATTERN.matcher(body);
         if (modelMatcher.find()) {
             String model = modelMatcher.group(1);
             if (!StringUtils.isEmpty(model) && LwoModel.isLwoModel(model))
                 this.lwoModel = new LwoModel(body);
+            else
+                System.err.println("LWO model is not defined for \"func_door\" entity with name"
+                        + (name == null ? "" : "\"" + name + "\""));
         }
     }
 }
