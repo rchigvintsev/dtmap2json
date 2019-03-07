@@ -7,6 +7,7 @@ import org.apache.commons.math3.util.Precision;
  */
 public class BoundingBox {
     private static final double ERROR = 1.0;
+    private static final double RANGE_ERROR = 5.0;
 
     private Double minX, maxX;
     private Double minY, maxY;
@@ -136,7 +137,7 @@ public class BoundingBox {
     }
 
     private static boolean checkRange(Double min, Double max, double value) {
-        return min != null && value >= min && max != null && value <= max;
+        return min != null && value >= min - RANGE_ERROR && max != null && value <= max + RANGE_ERROR;
     }
 
     private static Double zeroIfNull(Double v) {
