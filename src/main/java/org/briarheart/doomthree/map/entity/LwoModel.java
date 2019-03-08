@@ -17,11 +17,13 @@ public class LwoModel extends AbstractModel {
     private static final Pattern NAME_PATTERN = Pattern.compile("\"name\"\\s+\"(\\w+)\"");
     private static final Pattern MODEL_PATTERN = Pattern.compile("\"model\"\\s+\"([\\w/.]+)\"");
     private static final Pattern ROTATION_PATTERN = Pattern.compile("\"rotation\"\\s+\"([0-9 -.e]+)\"");
+    private static final Pattern SKIN_PATTERN = Pattern.compile("\"skin\"\\s+\"([\\w/]+)\"");
 
     private String name;
     private String mesh;
     private Vector3 position;
     private Vector3 rotation;
+    private String skin;
 
     public LwoModel(String modelBody) {
         super(modelBody);
@@ -60,6 +62,7 @@ public class LwoModel extends AbstractModel {
                 + "\"name\":\"" + mesh + "\","
                 + "\"position\":" + position + ","
                 + "\"rotation\":" + rotation
+                + (skin == null ? "" : ",\"skin\":\"" + skin + "\"")
                 + "}";
     }
 
@@ -75,6 +78,7 @@ public class LwoModel extends AbstractModel {
             mesh = modelMatcher.group(1);
         position = parseOrigin(body);
         rotation = parseRotation(body);
+        skin = parseSkin(body);
     }
 
     private Vector3 parseRotation(String s) {
@@ -84,5 +88,12 @@ public class LwoModel extends AbstractModel {
             return rotationMatrix.toAngles();
         }
         return new Vector3();
+    }
+
+    private String parseSkin(String s) {
+        Matcher matcher = SKIN_PATTERN.matcher(s);
+        if (matcher.find())
+            return matcher.group(1);
+        return null;
     }
 }
