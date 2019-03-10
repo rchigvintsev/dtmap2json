@@ -1,4 +1,6 @@
-package org.briarheart.doomthree.map.entity;
+package org.briarheart.doomthree.map.entity.model;
+
+import org.briarheart.doomthree.map.entity.Entity;
 
 import java.util.Map;
 
@@ -10,7 +12,7 @@ public abstract class AbstractModel extends Entity {
         super(modelBody);
     }
 
-    public abstract String getMesh();
+    public abstract String getModel();
 
     public abstract Map<String, String> getAnimations();
 }

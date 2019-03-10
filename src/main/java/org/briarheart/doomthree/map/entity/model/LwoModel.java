@@ -1,4 +1,4 @@
-package org.briarheart.doomthree.map.entity;
+package org.briarheart.doomthree.map.entity.model;
 
 import org.briarheart.doomthree.map.AbstractMap;
 import org.briarheart.doomthree.map.area.Area;
@@ -14,13 +14,11 @@ import java.util.regex.Pattern;
  * @author Roman Chigvintsev
  */
 public class LwoModel extends AbstractModel {
-    private static final Pattern NAME_PATTERN = Pattern.compile("\"name\"\\s+\"(\\w+)\"");
     private static final Pattern MODEL_PATTERN = Pattern.compile("\"model\"\\s+\"([\\w/.]+)\"");
     private static final Pattern ROTATION_PATTERN = Pattern.compile("\"rotation\"\\s+\"([0-9 -.e]+)\"");
     private static final Pattern SKIN_PATTERN = Pattern.compile("\"skin\"\\s+\"([\\w/]+)\"");
 
-    private String name;
-    private String mesh;
+    private String model;
     private Vector3 position;
     private Vector3 rotation;
     private String skin;
@@ -42,13 +40,13 @@ public class LwoModel extends AbstractModel {
             }
 
         if (warnIfFailed)
-            System.err.println("Could not find area to accommodate LWO model with name \"" + name + "\"");
+            System.err.println("Could not find area to accommodate LWO model with name \"" + getName() + "\"");
         return false;
     }
 
     @Override
-    public String getMesh() {
-        return mesh;
+    public String getModel() {
+        return model;
     }
 
     @Override
@@ -58,27 +56,29 @@ public class LwoModel extends AbstractModel {
 
     @Override
     public String toJson() {
-        return "{"
-                + "\"name\":\"" + mesh + "\","
-                + "\"position\":" + position + ","
-                + "\"rotation\":" + rotation
-                + (skin == null ? "" : ",\"skin\":\"" + skin + "\"")
-                + "}";
+        StringBuilder json = new StringBuilder("{");
+        writeAttributes(json);
+        return json.append("}").toString();
+    }
+
+    protected void writeAttributes(StringBuilder json) {
+        json.append("\"name\":\"").append(getName()).append("\",")
+                .append("\"model\":\"").append(model).append("\",")
+                .append("\"position\":").append(position).append(",")
+                .append("\"rotation\":").append(rotation);
+        if (skin != null)
+            json.append(",\"skin\":\"").append(skin).append("\"");
     }
 
     @Override
     protected void parse(String body) {
-        Matcher nameMatcher = NAME_PATTERN.matcher(body);
-        if (nameMatcher.find())
-            name = nameMatcher.group(1);
-        else
-            System.err.println("Failed to parse LWO model name");
+        super.parse(body);
         Matcher modelMatcher = MODEL_PATTERN.matcher(body);
         if (modelMatcher.find())
-            mesh = modelMatcher.group(1);
-        position = parseOrigin(body);
-        rotation = parseRotation(body);
-        skin = parseSkin(body);
+            this.model = modelMatcher.group(1);
+        this.position = parseOrigin(body);
+        this.rotation = parseRotation(body);
+        this.skin = parseSkin(body);
     }
 
     private Vector3 parseRotation(String s) {

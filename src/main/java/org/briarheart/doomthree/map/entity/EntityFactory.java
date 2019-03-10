@@ -2,6 +2,7 @@ package org.briarheart.doomthree.map.entity;
 
 import org.briarheart.doomthree.map.AbstractMap;
 import org.briarheart.doomthree.map.Md5ModelDef;
+import org.briarheart.doomthree.map.entity.model.Md5Model;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,6 +34,8 @@ public class EntityFactory {
                     return new MoveableBase(entityBody);
                 case "func_door":
                     return new FuncDoor(entityBody);
+                case "trigger_relay":
+                    return new TriggerRelay(entityBody);
                 default:
                     Md5ModelDef modelDef = findMd5ModelDef(map, className);
                     if (modelDef != null)

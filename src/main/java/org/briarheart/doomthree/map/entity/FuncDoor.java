@@ -2,11 +2,13 @@ package org.briarheart.doomthree.map.entity;
 
 import org.apache.commons.lang3.StringUtils;
 import org.briarheart.doomthree.map.AbstractMap;
+import org.briarheart.doomthree.map.entity.model.DoorModel;
+import org.briarheart.doomthree.map.entity.model.LwoModel;
 
 import java.util.regex.Matcher;
 
 public class FuncDoor extends Entity {
-    private LwoModel lwoModel;
+    private LwoModel doorModel;
 
     public FuncDoor(String entityBody) {
         super(entityBody);
@@ -14,8 +16,8 @@ public class FuncDoor extends Entity {
 
     @Override
     public boolean visit(AbstractMap map, boolean warnIfFailed) {
-        if (lwoModel != null)
-            return lwoModel.visit(map, warnIfFailed);
+        if (doorModel != null)
+            return doorModel.visit(map, warnIfFailed);
         return true;
     }
 
@@ -26,21 +28,19 @@ public class FuncDoor extends Entity {
 
     @Override
     protected void parse(String body) {
-        String name = null;
-        Matcher nameMatcher = NAME_PATTERN.matcher(body);
-        if (nameMatcher.find())
-            name = nameMatcher.group(1);
+        super.parse(body);
+        String model = parseModel(body);
+        if (!StringUtils.isEmpty(model) && LwoModel.isLwoModel(model))
+            this.doorModel = new DoorModel(body);
         else
-            System.err.println("Failed to parse name of \"func_static\"");
+            System.err.println("LWO model is not defined for \"func_door\" entity"
+                    + (getName() == null ? "" : " with name \"" + getName() + "\""));
+    }
 
-        Matcher modelMatcher = MODEL_PATTERN.matcher(body);
-        if (modelMatcher.find()) {
-            String model = modelMatcher.group(1);
-            if (!StringUtils.isEmpty(model) && LwoModel.isLwoModel(model))
-                this.lwoModel = new LwoModel(body);
-            else
-                System.err.println("LWO model is not defined for \"func_door\" entity with name"
-                        + (name == null ? "" : "\"" + name + "\""));
-        }
+    private String parseModel(String body) {
+        Matcher matcher = MODEL_PATTERN.matcher(body);
+        if (matcher.find())
+            return matcher.group(1);
+        return null;
     }
 }

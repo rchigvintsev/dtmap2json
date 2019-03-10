@@ -4,9 +4,9 @@ import org.apache.commons.lang3.Validate;
 import org.briarheart.doomthree.map.AbstractMap;
 import org.briarheart.doomthree.map.Materials;
 import org.briarheart.doomthree.map.area.surface.Surface;
-import org.briarheart.doomthree.map.entity.AbstractModel;
 import org.briarheart.doomthree.map.entity.Light;
 import org.briarheart.doomthree.map.entity.Skybox;
+import org.briarheart.doomthree.map.entity.model.AbstractModel;
 import org.briarheart.doomthree.util.BoundingBox;
 import org.briarheart.doomthree.util.Vector3;
 
@@ -76,7 +76,7 @@ public class Area implements Iterable<Surface> {
         for (Surface surface : surfaces)
             meta.getMaterials().add(surface.getMaterialName());
         for (AbstractModel model : models) {
-            meta.getModels().add(model.getMesh());
+            meta.getModels().add(model.getModel());
             meta.getAnimations().addAll(model.getAnimations().values());
         }
     }

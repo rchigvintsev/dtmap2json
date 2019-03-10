@@ -51,6 +51,7 @@ public abstract class MovingEntity extends Entity {
 
     @Override
     protected void parse(String body) {
+        super.parse(body);
         position = parseOrigin(body);
     }
 

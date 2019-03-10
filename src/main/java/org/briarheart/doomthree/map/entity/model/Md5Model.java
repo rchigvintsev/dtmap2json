@@ -1,4 +1,4 @@
-package org.briarheart.doomthree.map.entity;
+package org.briarheart.doomthree.map.entity.model;
 
 import org.apache.commons.lang3.StringUtils;
 import org.briarheart.doomthree.map.AbstractMap;
@@ -14,12 +14,10 @@ import java.util.regex.Pattern;
  * @author Roman Chigvintsev
  */
 public class Md5Model extends AbstractModel {
-    private static final Pattern NAME_PATTERN = Pattern.compile("\"name\"\\s+\"(\\w+)\"");
     private static final Pattern START_ANIM_PATTERN = Pattern.compile("\"startanim\"\\s+\"(\\w+)\"");
 
     private final Md5ModelDef modelDef;
 
-    private String name;
     private Vector3 position;
     private String startAnimation;
 
@@ -29,7 +27,7 @@ public class Md5Model extends AbstractModel {
     }
 
     @Override
-    public String getMesh() {
+    public String getModel() {
         return modelDef.getMesh();
     }
 
@@ -47,14 +45,14 @@ public class Md5Model extends AbstractModel {
                     return true;
                 }
             if (warnIfFailed)
-                System.err.println("Could not find area to accommodate MD5 model with name \"" + name + "\"");
+                System.err.println("Could not find area to accommodate MD5 model with name \"" + getName() + "\"");
         }
         return false;
     }
 
     @Override
     public String toJson() {
-        StringBuilder json = new StringBuilder("{\"name\":\"")
+        StringBuilder json = new StringBuilder("{\"model\":\"")
                 .append(modelDef.getMesh()).append("\",")
                 .append("\"position\":").append(position);
         if (!StringUtils.isEmpty(startAnimation))
@@ -74,11 +72,7 @@ public class Md5Model extends AbstractModel {
 
     @Override
     protected void parse(String body) {
-        Matcher nameMatcher = NAME_PATTERN.matcher(body);
-        if (nameMatcher.find())
-            name = nameMatcher.group(1);
-        else
-            System.err.println("Failed to parse MD5 model name");
+        super.parse(body);
         Matcher startAnimMatcher = START_ANIM_PATTERN.matcher(body);
         if (startAnimMatcher.find())
             startAnimation = startAnimMatcher.group(1);

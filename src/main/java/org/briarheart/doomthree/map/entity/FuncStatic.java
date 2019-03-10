@@ -2,6 +2,7 @@ package org.briarheart.doomthree.map.entity;
 
 import org.apache.commons.lang3.StringUtils;
 import org.briarheart.doomthree.map.AbstractMap;
+import org.briarheart.doomthree.map.entity.model.LwoModel;
 
 import java.util.regex.Matcher;
 
@@ -9,7 +10,6 @@ import java.util.regex.Matcher;
  * @author Roman Chigvintsev
  */
 public class FuncStatic extends MovingEntity {
-    private String name;
     private LwoModel lwoModel;
 
     public FuncStatic(String entityBody) {
@@ -30,17 +30,12 @@ public class FuncStatic extends MovingEntity {
 
     @Override
     protected String getTargetAreaName() {
-        return name;
+        return getName();
     }
 
     @Override
     protected void parse(String body) {
         super.parse(body);
-        Matcher nameMatcher = NAME_PATTERN.matcher(body);
-        if (nameMatcher.find())
-            this.name = nameMatcher.group(1);
-        else
-            System.err.println("Failed to parse name of \"func_static\"");
         Matcher modelMatcher = MODEL_PATTERN.matcher(body);
         if (modelMatcher.find()) {
             String model = modelMatcher.group(1);

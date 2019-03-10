@@ -3,10 +3,7 @@ package org.briarheart.doomthree.map;
 import org.apache.commons.lang3.StringUtils;
 import org.briarheart.doomthree.map.area.Area;
 import org.briarheart.doomthree.map.area.surface.Surface;
-import org.briarheart.doomthree.map.entity.Entity;
-import org.briarheart.doomthree.map.entity.InfoPlayerStart;
-import org.briarheart.doomthree.map.entity.Light;
-import org.briarheart.doomthree.map.entity.Skybox;
+import org.briarheart.doomthree.map.entity.*;
 
 import java.util.*;
 
@@ -19,6 +16,7 @@ public abstract class AbstractMap {
     private final List<Md5ModelDef> md5ModelDefs = new LinkedList<>();
     private final List<Area> areas = new LinkedList<>();
     private final List<Light> lights = new ArrayList<>();
+    private final List<TriggerRelay> triggers = new ArrayList<>();
     private final Meta meta;
 
     private InfoPlayerStart infoPlayerStart;
@@ -56,6 +54,10 @@ public abstract class AbstractMap {
 
     public List<Light> getLights() {
         return lights;
+    }
+
+    public List<TriggerRelay> getTriggers() {
+        return triggers;
     }
 
     public InfoPlayerStart getInfoPlayerStart() {
@@ -139,6 +141,19 @@ public abstract class AbstractMap {
                 if (i > 0)
                     json.append(",");
                 json.append(light);
+            }
+            json.append("]");
+        }
+
+        if (!triggers.isEmpty()) {
+            if (json.length() > 1)
+                json.append(",");
+            json.append("\"triggers\":[");
+            for (int i = 0; i < triggers.size(); i++) {
+                TriggerRelay trigger = triggers.get(i);
+                if (i > 0)
+                    json.append(",");
+                json.append(trigger);
             }
             json.append("]");
         }
