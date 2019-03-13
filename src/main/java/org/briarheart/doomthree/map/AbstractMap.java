@@ -171,6 +171,7 @@ public abstract class AbstractMap {
         private final Set<String> materials = new HashSet<>();
         private final Set<String> models = new HashSet<>();
         private final Set<String> animations = new HashSet<>();
+        private final Set<String> sounds = new HashSet<>();
 
         public Meta(String name) {
             this.name = name;
@@ -188,38 +189,28 @@ public abstract class AbstractMap {
             return animations;
         }
 
+        public Set<String> getSounds() {
+            return sounds;
+        }
+
         public String toJson() {
             StringBuilder json = new StringBuilder();
             json.append("{\"name\":\"").append(name).append("\"");
             if (!materials.isEmpty()) {
-                json.append(",\"materials\":[");
-                int i = 0;
-                for (String material : materials) {
-                    if (i++ > 0)
-                        json.append(",");
-                    json.append("\"").append(material).append("\"");
-                }
-                json.append("]");
+                json.append(",\"materials\":");
+                writeSet(materials, json);
             }
             if (!models.isEmpty()) {
-                json.append(",\"models\":[");
-                int i = 0;
-                for (String model : models) {
-                    if (i++ > 0)
-                        json.append(",");
-                    json.append("\"").append(model).append("\"");
-                }
-                json.append("]");
+                json.append(",\"models\":");
+                writeSet(models, json);
             }
             if (!animations.isEmpty()) {
-                json.append(",\"animations\":[");
-                int i = 0;
-                for (String animation : animations) {
-                    if (i++ > 0)
-                        json.append(",");
-                    json.append("\"").append(animation).append("\"");
-                }
-                json.append("]");
+                json.append(",\"animations\":");
+                writeSet(animations, json);
+            }
+            if (!sounds.isEmpty()) {
+                json.append(",\"sounds\":");
+                writeSet(sounds, json);
             }
             return json + "}";
         }
@@ -227,6 +218,17 @@ public abstract class AbstractMap {
         @Override
         public String toString() {
             return toJson();
+        }
+
+        private void writeSet(Set<String> set, StringBuilder json) {
+            json.append("[");
+            int i = 0;
+            for (String element : set) {
+                if (i++ > 0)
+                    json.append(",");
+                json.append("\"").append(element).append("\"");
+            }
+            json.append("]");
         }
     }
 }

@@ -78,6 +78,7 @@ public class Area implements Iterable<Surface> {
         for (AbstractModel model : models) {
             meta.getModels().add(model.getModel());
             meta.getAnimations().addAll(model.getAnimations().values());
+            meta.getSounds().addAll(model.getSounds().values());
         }
     }
 
