@@ -6,11 +6,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DoorModel extends LwoModel {
+    public static final Pattern TEAM_PATTERN = Pattern.compile("\"team\"\\s+\"(\\w+)\"");
     public static final Pattern TIME_PATTERN = Pattern.compile("\"time\"\\s+\"([\\d.]+)\"");
     public static final Pattern MOVE_DIRECTION_PATTERN = Pattern.compile("\"movedir\"\\s+\"(\\d+)\"");
     public static final Pattern SOUND_OPEN_PATTERN = Pattern.compile("\"snd_open\"\\s+\"(\\w+)\"");
     public static final Pattern SOUND_CLOSE_PATTERN = Pattern.compile("\"snd_close\"\\s+\"(\\w+)\"");
 
+    private String team;
     private Float time;
     private Integer moveDirection;
     private String soundOpen;
@@ -35,6 +37,8 @@ public class DoorModel extends LwoModel {
     @Override
     protected void writeAttributes(StringBuilder json) {
         super.writeAttributes(json);
+        if (team != null)
+            json.append(",\"team\":\"").append(team).append("\"");
         if (time != null)
             json.append(",\"time\":").append(time);
         if (moveDirection != null)
@@ -57,10 +61,18 @@ public class DoorModel extends LwoModel {
     @Override
     protected void parse(String body) {
         super.parse(body);
+        this.team = parseTeam(body);
         this.time = parseTime(body);
         this.moveDirection = parseMoveDirection(body);
         this.soundOpen = parseSoundOpen(body);
         this.soundClose = parseSoundClose(body);
+    }
+
+    private String parseTeam(String body) {
+        Matcher matcher = TEAM_PATTERN.matcher(body);
+        if (matcher.find())
+            return matcher.group(1);
+        return null;
     }
 
     private Float parseTime(String body) {

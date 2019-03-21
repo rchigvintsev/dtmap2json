@@ -8,7 +8,7 @@ import org.briarheart.doomthree.map.entity.model.LwoModel;
 import java.util.regex.Matcher;
 
 public class FuncDoor extends Entity {
-    private LwoModel doorModel;
+    private DoorModel doorModel;
 
     public FuncDoor(String entityBody) {
         super(entityBody);
