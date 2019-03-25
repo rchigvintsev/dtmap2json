@@ -24,7 +24,7 @@ public abstract class Entity {
     /**
      * @return {@code true} if entity is successfully added to the map, {@code false} otherwise
      */
-    public abstract boolean visit(AbstractMap map, boolean warnIfFailed);
+    public abstract boolean visit(AbstractMap map, boolean lastAttempt);
 
     public String getName() {
         return name;

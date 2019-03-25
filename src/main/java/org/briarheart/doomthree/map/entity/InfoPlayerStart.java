@@ -23,7 +23,7 @@ public class InfoPlayerStart extends Entity {
     }
 
     @Override
-    public boolean visit(AbstractMap map, boolean warnIfFailed) {
+    public boolean visit(AbstractMap map, boolean lastAttempt) {
         map.setInfoPlayerStart(this);
         return true;
     }

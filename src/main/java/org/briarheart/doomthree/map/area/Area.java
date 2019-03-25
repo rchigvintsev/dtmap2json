@@ -4,6 +4,7 @@ import org.apache.commons.lang3.Validate;
 import org.briarheart.doomthree.map.AbstractMap;
 import org.briarheart.doomthree.map.Materials;
 import org.briarheart.doomthree.map.area.surface.Surface;
+import org.briarheart.doomthree.map.area.surface.physics.CollisionModel;
 import org.briarheart.doomthree.map.entity.Light;
 import org.briarheart.doomthree.map.entity.Skybox;
 import org.briarheart.doomthree.map.entity.model.AbstractModel;
@@ -56,6 +57,10 @@ public class Area implements Iterable<Surface> {
 
     public BoundingBox getBoundingBox() {
         return boundingBox;
+    }
+
+    public List<AbstractModel> getModels() {
+        return models;
     }
 
     public List<Light> getLights() {
@@ -127,6 +132,26 @@ public class Area implements Iterable<Surface> {
             json.append("]");
         }
         return json.append("}").toString();
+    }
+
+    public void copy(Area otherArea, Vector3 position) {
+        for (Surface surface : surfaces) {
+            surface.setPosition(position);
+            CollisionModel collisionModel = surface.getCollisionModel();
+            if (collisionModel != null)
+                collisionModel.getBody().setPosition(position);
+            otherArea.addSurface(surface);
+        }
+
+        for (AbstractModel model : models) {
+            model.setPosition(position);
+            otherArea.getModels().add(model);
+        }
+
+        for (Light light : lights) {
+            light.setPosition(position);
+            otherArea.getLights().add(light);
+        }
     }
 
     protected void parse(String areaBody) {

@@ -76,8 +76,8 @@ public abstract class AbstractMap {
         this.skybox = skybox;
     }
 
-    public boolean addEntity(Entity entity, boolean warnIfFailed) {
-        return entity.visit(this, warnIfFailed);
+    public boolean addEntity(Entity entity, boolean lastAttempt) {
+        return entity.visit(this, lastAttempt);
     }
 
     public Md5ModelDef newMd5ModelDef(String body) {

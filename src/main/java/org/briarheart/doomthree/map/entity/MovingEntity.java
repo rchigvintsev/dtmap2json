@@ -2,8 +2,6 @@ package org.briarheart.doomthree.map.entity;
 
 import org.briarheart.doomthree.map.AbstractMap;
 import org.briarheart.doomthree.map.area.Area;
-import org.briarheart.doomthree.map.area.surface.Surface;
-import org.briarheart.doomthree.map.area.surface.physics.CollisionModel;
 import org.briarheart.doomthree.util.Vector3;
 
 import java.util.List;
@@ -19,35 +17,37 @@ public abstract class MovingEntity extends Entity {
     }
 
     @Override
-    public boolean visit(AbstractMap map, boolean warnIfFailed) {
-        String modelName = getTargetAreaName();
-        int areaIndex = findArea(map, modelName);
-        if (areaIndex == -1) {
-            if (warnIfFailed)
-                System.err.println("Area with name \"" + modelName + "\" is not found");
+    public boolean visit(AbstractMap map, boolean lastAttempt) {
+        int areaIndex = getTargetAreaIndex(map, lastAttempt);
+        if (areaIndex == -1)
             return false;
-        }
 
         List<Area> areas = map.getAreas();
         Area area = areas.remove(areaIndex);
         for (Area otherArea : areas)
             if (otherArea.getBoundingBox().contains(position)) {
-                for (Surface surface : area) {
-                    surface.setPosition(position);
-                    CollisionModel collisionModel = surface.getCollisionModel();
-                    if (collisionModel != null)
-                        collisionModel.getBody().setPosition(position);
-                    otherArea.addSurface(surface);
-                }
+                area.copy(otherArea, position);
                 return true;
             }
 
-        if (warnIfFailed)
+        if (lastAttempt)
             System.err.println("Could not find area to accommodate another area with name \"" + area.getName() + "\"");
         return false;
     }
 
     protected abstract String getTargetAreaName();
+
+    protected Vector3 getPosition() {
+        return position;
+    }
+
+    protected int getTargetAreaIndex(AbstractMap map, boolean lastAttempt) {
+        String areaName = getTargetAreaName();
+        int areaIndex = findArea(map, areaName);
+        if (areaIndex == -1 && lastAttempt)
+            System.err.println("Area with name \"" + areaName + "\" is not found");
+        return areaIndex;
+    }
 
     @Override
     protected void parse(String body) {
@@ -55,7 +55,7 @@ public abstract class MovingEntity extends Entity {
         position = parseOrigin(body);
     }
 
-    private static int findArea(AbstractMap map, String modelName) {
+    protected static int findArea(AbstractMap map, String modelName) {
         int areaIndex = -1;
         List<Area> areas = map.getAreas();
         for (int i = 0; i < areas.size(); i++) {

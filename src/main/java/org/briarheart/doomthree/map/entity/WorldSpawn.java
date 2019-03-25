@@ -11,7 +11,7 @@ public class WorldSpawn extends Entity {
     }
 
     @Override
-    public boolean visit(AbstractMap map, boolean warnIfFailed) {
+    public boolean visit(AbstractMap map, boolean lastAttempt) {
         return true;
     }
 

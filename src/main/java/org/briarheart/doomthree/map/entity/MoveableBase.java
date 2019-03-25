@@ -16,6 +16,11 @@ public class MoveableBase extends MovingEntity {
     }
 
     @Override
+    public String toString() {
+        return getName();
+    }
+
+    @Override
     public String toJson() {
         return "";
     }

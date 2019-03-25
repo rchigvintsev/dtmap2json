@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.briarheart.doomthree.map.AbstractMap;
 import org.briarheart.doomthree.map.Md5ModelDef;
 import org.briarheart.doomthree.map.area.Area;
-import org.briarheart.doomthree.util.Vector3;
 
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -18,7 +17,6 @@ public class Md5Model extends AbstractModel {
 
     private final Md5ModelDef modelDef;
 
-    private Vector3 position;
     private String startAnimation;
 
     public Md5Model(String modelBody, Md5ModelDef modelDef) {
@@ -37,14 +35,14 @@ public class Md5Model extends AbstractModel {
     }
 
     @Override
-    public boolean visit(AbstractMap map, boolean warnIfFailed) {
+    public boolean visit(AbstractMap map, boolean lastAttempt) {
         if (!StringUtils.isEmpty(modelDef.getMesh())) {
             for (Area area : map.getAreas())
-                if (area.getBoundingBox().contains(position)) {
+                if (area.getBoundingBox().contains(getPosition())) {
                     area.addModel(this);
                     return true;
                 }
-            if (warnIfFailed)
+            if (lastAttempt)
                 System.err.println("Could not find area to accommodate MD5 model with name \"" + getName() + "\"");
         }
         return false;
@@ -54,7 +52,7 @@ public class Md5Model extends AbstractModel {
     public String toJson() {
         StringBuilder json = new StringBuilder("{\"model\":\"")
                 .append(modelDef.getMesh()).append("\",")
-                .append("\"position\":").append(position);
+                .append("\"position\":").append(getPosition());
         if (!StringUtils.isEmpty(startAnimation))
             json.append(",\"startAnimation\":\"").append(startAnimation).append("\"");
         if (!modelDef.getAnimations().isEmpty()) {
@@ -67,6 +65,7 @@ public class Md5Model extends AbstractModel {
             }
             json.append("]");
         }
+        appendBoundSurfaces(json);
         return  json.append("}").toString();
     }
 
@@ -76,6 +75,6 @@ public class Md5Model extends AbstractModel {
         Matcher startAnimMatcher = START_ANIM_PATTERN.matcher(body);
         if (startAnimMatcher.find())
             startAnimation = startAnimMatcher.group(1);
-        position = parseOrigin(body);
+        setPosition(parseOrigin(body));
     }
 }

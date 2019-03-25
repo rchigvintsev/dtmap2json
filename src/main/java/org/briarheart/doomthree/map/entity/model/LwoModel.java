@@ -19,7 +19,6 @@ public class LwoModel extends AbstractModel {
     private static final Pattern SKIN_PATTERN = Pattern.compile("\"skin\"\\s+\"([\\w/]+)\"");
 
     private String model;
-    private Vector3 position;
     private Vector3 rotation;
     private String skin;
 
@@ -32,14 +31,14 @@ public class LwoModel extends AbstractModel {
     }
 
     @Override
-    public boolean visit(AbstractMap map, boolean warnIfFailed) {
+    public boolean visit(AbstractMap map, boolean lastAttempt) {
         for (Area area : map.getAreas())
-            if (area.getBoundingBox().contains(position)) {
+            if (area.getBoundingBox().contains(getPosition())) {
                 area.addModel(this);
                 return true;
             }
 
-        if (warnIfFailed)
+        if (lastAttempt)
             System.err.println("Could not find area to accommodate LWO model with name \"" + getName() + "\"");
         return false;
     }
@@ -64,10 +63,11 @@ public class LwoModel extends AbstractModel {
     protected void writeAttributes(StringBuilder json) {
         json.append("\"name\":\"").append(getName()).append("\",")
                 .append("\"model\":\"").append(model).append("\",")
-                .append("\"position\":").append(position).append(",")
+                .append("\"position\":").append(getPosition()).append(",")
                 .append("\"rotation\":").append(rotation);
         if (skin != null)
             json.append(",\"skin\":\"").append(skin).append("\"");
+        appendBoundSurfaces(json);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class LwoModel extends AbstractModel {
         Matcher modelMatcher = MODEL_PATTERN.matcher(body);
         if (modelMatcher.find())
             this.model = modelMatcher.group(1);
-        this.position = parseOrigin(body);
+        setPosition(parseOrigin(body));
         this.rotation = parseRotation(body);
         this.skin = parseSkin(body);
     }

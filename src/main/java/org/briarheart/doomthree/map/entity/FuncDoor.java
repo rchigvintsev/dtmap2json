@@ -15,9 +15,9 @@ public class FuncDoor extends Entity {
     }
 
     @Override
-    public boolean visit(AbstractMap map, boolean warnIfFailed) {
+    public boolean visit(AbstractMap map, boolean lastAttempt) {
         if (doorModel != null)
-            return doorModel.visit(map, warnIfFailed);
+            return doorModel.visit(map, lastAttempt);
         return true;
     }
 

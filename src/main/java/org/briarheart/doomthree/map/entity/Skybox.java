@@ -18,7 +18,7 @@ public class Skybox extends Entity {
     }
 
     @Override
-    public boolean visit(AbstractMap map, boolean warnIfFailed) {
+    public boolean visit(AbstractMap map, boolean lastAttempt) {
         map.setSkybox(this);
         return true;
     }

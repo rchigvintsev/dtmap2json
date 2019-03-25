@@ -24,7 +24,7 @@ public class Light extends Entity {
     }
 
     @Override
-    public boolean visit(AbstractMap map, boolean warnIfFailed) {
+    public boolean visit(AbstractMap map, boolean lastAttempt) {
         for (Area area : map.getAreas())
             if (area.getBoundingBox().contains(position)) {
                 area.getLights().add(this);
@@ -37,6 +37,14 @@ public class Light extends Entity {
         }
 
         return false;
+    }
+
+    public Vector3 getPosition() {
+        return position;
+    }
+
+    public void setPosition(Vector3 position) {
+        this.position = position;
     }
 
     @Override
