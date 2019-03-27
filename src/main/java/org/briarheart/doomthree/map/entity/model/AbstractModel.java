@@ -43,7 +43,7 @@ public abstract class AbstractModel extends Entity {
 
     protected void appendBoundSurfaces(StringBuilder json) {
         if (!boundSurfaces.isEmpty()) {
-            json.append(",\"surfaces:[");
+            json.append(",\"surfaces\":[");
             for (int i = 0; i < boundSurfaces.size(); i++) {
                 Surface surface = boundSurfaces.get(i);
                 if (i > 0)

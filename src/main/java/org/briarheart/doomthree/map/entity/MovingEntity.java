@@ -23,10 +23,11 @@ public abstract class MovingEntity extends Entity {
             return false;
 
         List<Area> areas = map.getAreas();
-        Area area = areas.remove(areaIndex);
+        Area area = areas.get(areaIndex);
         for (Area otherArea : areas)
             if (otherArea.getBoundingBox().contains(position)) {
                 area.copy(otherArea, position);
+                areas.remove(areaIndex);
                 return true;
             }
 

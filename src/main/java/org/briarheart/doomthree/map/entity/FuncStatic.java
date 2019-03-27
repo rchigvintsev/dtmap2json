@@ -37,7 +37,8 @@ public class FuncStatic extends MovingEntity {
             int areaIndex = getTargetAreaIndex(map, lastAttempt);
             if (areaIndex == -1)
                 return false;
-            Area targetArea = map.getAreas().remove(areaIndex);
+            List<Area> areas = map.getAreas();
+            Area targetArea = areas.get(areaIndex);
             // For only attaching of surfaces is supported
             if (!targetArea.getModels().isEmpty() || !targetArea.getLights().isEmpty())
                 throw new RuntimeException("Surfaces of area \"" + targetArea.getName()
@@ -58,6 +59,8 @@ public class FuncStatic extends MovingEntity {
                 // TODO: Perhaps I should update bounding box of model's area here
                 model.getBoundSurfaces().add(surface);
             }
+
+            areas.remove(areaIndex);
             return true;
         }
         return lwoModel.visit(map, lastAttempt);
