@@ -5,7 +5,9 @@ import org.briarheart.doomthree.map.area.Area;
 import org.briarheart.doomthree.util.Matrix4;
 import org.briarheart.doomthree.util.Vector3;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,12 +17,14 @@ import java.util.regex.Pattern;
  */
 public class LwoModel extends AbstractModel {
     private static final Pattern MODEL_PATTERN = Pattern.compile("\"model\"\\s+\"([\\w/.]+)\"");
+    private static final Pattern GUI_PATTERN = Pattern.compile("\"gui(\\d*)\"\\s+\"([\\w/.]+)\"");
     private static final Pattern ROTATION_PATTERN = Pattern.compile("\"rotation\"\\s+\"([0-9 -.e]+)\"");
     private static final Pattern SKIN_PATTERN = Pattern.compile("\"skin\"\\s+\"([\\w/]+)\"");
 
     private String model;
     private Vector3 rotation;
     private String skin;
+    private List<String> gui;
 
     public LwoModel(String modelBody) {
         super(modelBody);
@@ -67,6 +71,15 @@ public class LwoModel extends AbstractModel {
                 .append("\"rotation\":").append(rotation);
         if (skin != null)
             json.append(",\"skin\":\"").append(skin).append("\"");
+        if (!gui.isEmpty()) {
+            json.append(",\"gui\":[");
+            for (int i = 0; i < gui.size(); i++) {
+                if (i > 0)
+                    json.append(",");
+                json.append("\"").append(gui.get(i)).append("\"");
+            }
+            json.append("]");
+        }
         appendBoundSurfaces(json);
     }
 
@@ -79,6 +92,7 @@ public class LwoModel extends AbstractModel {
         setPosition(parseOrigin(body));
         this.rotation = parseRotation(body);
         this.skin = parseSkin(body);
+        this.gui = parseGui(body);
     }
 
     private Vector3 parseRotation(String s) {
@@ -95,5 +109,21 @@ public class LwoModel extends AbstractModel {
         if (matcher.find())
             return matcher.group(1);
         return null;
+    }
+
+    private List<String> parseGui(String s) {
+        List<String> result = new ArrayList<>();
+        Matcher matcher = GUI_PATTERN.matcher(s);
+        while (matcher.find()) {
+            String number = matcher.group(1);
+            if (number == null || number.isEmpty())
+                number = "1";
+            int n = Integer.parseInt(number);
+            if (n > result.size())
+                for (int i = result.size(); i < n; i++)
+                    result.add(null);
+            result.set(n - 1, matcher.group(2));
+        }
+        return result;
     }
 }
