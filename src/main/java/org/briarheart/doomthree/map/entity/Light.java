@@ -13,11 +13,14 @@ import java.util.regex.Pattern;
  */
 public class Light extends Entity {
     private static final Pattern COLOR_PATTERN = Pattern.compile("\"_color\"\\s+\"([0-9 .]+)\"");
+    private static final Pattern LIGHT_RADIUS_PATTERN = Pattern.compile("\"light_radius\"\\s+\"([0-9 .]+)\"");
+
+    private static final double DISTANCE_FACTOR = 2.0d;
 
     private String type = "point";
     private Vector3 position;
     private String color;
-    private int distance = 272;
+    private int distance;
 
     public Light(String entityBody) {
         super(entityBody);
@@ -49,7 +52,7 @@ public class Light extends Entity {
 
     @Override
     public String toJson() {
-        String json = "{\"type\":\"" + type + "\",\"position\":" + position;
+        String json = "{\"name\":\"" + getName() + "\",\"type\":\"" + type + "\",\"position\":" + position;
         if (color != null)
             json += ",\"color\":\"" + color + "\"";
         return json + ",\"distance\":" + distance + "}";
@@ -57,8 +60,15 @@ public class Light extends Entity {
 
     @Override
     protected void parse(String body) {
+        super.parse(body);
         position = parseOrigin(body);
-        Matcher matcher = COLOR_PATTERN.matcher(body);
+        color = parseColor(body);
+        Vector3 lightRadius = parseLightRadius(body);
+        distance = (int) (getMaxRadius(lightRadius) * DISTANCE_FACTOR);
+    }
+
+    protected String parseColor(String s) {
+        Matcher matcher = COLOR_PATTERN.matcher(s);
         if (matcher.find()) {
             StringBuilder color = new StringBuilder("#");
             String[] rgb = matcher.group(1).split(" ");
@@ -68,8 +78,22 @@ public class Light extends Entity {
                     color.append('0');
                 color.append(component);
             }
-            this.color = color.toString();
-        } else
-            System.err.println("Failed to parse light color");
+            return color.toString();
+        }
+        System.err.println("Failed to parse light color");
+        return null;
+    }
+
+    protected Vector3 parseLightRadius(String s) {
+        Matcher matcher = LIGHT_RADIUS_PATTERN.matcher(s);
+        if (matcher.find())
+            return Vector3.fromString(matcher.group(1));
+        System.err.println("Failed to parse light radius");
+        return new Vector3();
+    }
+
+    private double getMaxRadius(Vector3 lightRadius) {
+        double max = Double.compare(lightRadius.x, lightRadius.y) > 0 ? lightRadius.x : lightRadius.y;
+        return Double.compare(max, lightRadius.z) > 0 ? lightRadius.x : lightRadius.y;
     }
 }
