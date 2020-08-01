@@ -19,7 +19,7 @@ public class LwoModel extends AbstractModel {
     private static final Pattern MODEL_PATTERN = Pattern.compile("\"model\"\\s+\"([\\w/.]+)\"");
     private static final Pattern GUI_PATTERN = Pattern.compile("\"gui(\\d*)\"\\s+\"([\\w/.]+)\"");
     private static final Pattern ROTATION_PATTERN = Pattern.compile("\"rotation\"\\s+\"([0-9 -.e]+)\"");
-    private static final Pattern SKIN_PATTERN = Pattern.compile("\"skin\"\\s+\"([\\w/]+)\"");
+    private static final Pattern SKIN_PATTERN = Pattern.compile("\"skin\"\\s+\"([\\w/]+)(\\.skin)?\"");
 
     private String model;
     private Vector3 rotation;
