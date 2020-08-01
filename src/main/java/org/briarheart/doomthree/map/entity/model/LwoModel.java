@@ -36,11 +36,12 @@ public class LwoModel extends AbstractModel {
 
     @Override
     public boolean visit(AbstractMap map, boolean lastAttempt) {
-        for (Area area : map.getAreas())
+        for (Area area : map.getAreas()) {
             if (area.getBoundingBox().contains(getPosition())) {
                 area.addModel(this);
                 return true;
             }
+        }
 
         if (lastAttempt)
             System.err.println("Could not find area to accommodate LWO model with name \"" + getName() + "\"");

@@ -39,10 +39,6 @@ public class FuncStatic extends MovingEntity {
                 return false;
             List<Area> areas = map.getAreas();
             Area targetArea = areas.get(areaIndex);
-            // For only attaching of surfaces is supported
-            if (!targetArea.getModels().isEmpty() || !targetArea.getLights().isEmpty())
-                throw new RuntimeException("Surfaces of area \"" + targetArea.getName()
-                        + "\" cannot be bound with model: area contains models or lights");
 
             AbstractModel model = findModel(map, bind);
             if (model == null) {

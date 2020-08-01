@@ -7,7 +7,7 @@ import org.apache.commons.math3.util.Precision;
  */
 public class BoundingBox {
     private static final double ERROR = 1.0;
-    private static final double RANGE_ERROR = 5.0;
+    private static final double RANGE_ERROR = 20.0;
 
     private Double minX, maxX;
     private Double minY, maxY;
