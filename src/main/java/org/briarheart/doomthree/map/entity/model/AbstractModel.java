@@ -1,5 +1,8 @@
 package org.briarheart.doomthree.map.entity.model;
 
+import org.apache.commons.lang3.StringUtils;
+import org.briarheart.doomthree.map.AbstractMap;
+import org.briarheart.doomthree.map.area.Area;
 import org.briarheart.doomthree.map.area.surface.Surface;
 import org.briarheart.doomthree.map.entity.Entity;
 import org.briarheart.doomthree.util.Vector3;
@@ -52,5 +55,18 @@ public abstract class AbstractModel extends Entity {
             }
             json.append("]");
         }
+    }
+
+    protected Area findTargetArea(AbstractMap map) {
+        Area targetArea = null;
+        for (Area area : map.getAreas()) {
+            if (area.getBoundingBox().contains(getPosition())) {
+                targetArea = area;
+                if (StringUtils.isEmpty(map.getAreaFilter()) || map.getAreaFilter().equals(area.getName())) {
+                    break;
+                }
+            }
+        }
+        return targetArea;
     }
 }

@@ -37,13 +37,15 @@ public class Md5Model extends AbstractModel {
     @Override
     public boolean visit(AbstractMap map, boolean lastAttempt) {
         if (!StringUtils.isEmpty(modelDef.getMesh())) {
-            for (Area area : map.getAreas())
-                if (area.getBoundingBox().contains(getPosition())) {
-                    area.addModel(this);
-                    return true;
-                }
-            if (lastAttempt)
+            Area targetArea = findTargetArea(map);
+            if (targetArea != null) {
+                targetArea.addModel(this);
+                return true;
+            }
+
+            if (lastAttempt) {
                 System.err.println("Could not find area to accommodate MD5 model with name \"" + getName() + "\"");
+            }
         }
         return false;
     }

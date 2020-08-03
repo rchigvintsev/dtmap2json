@@ -157,10 +157,11 @@ public class Main {
                 if (line.startsWith("model {")) {
                     int startedAt = lineNumber.intValue();
                     Area area = readNextArea(scanner, line, lineNumber, map);
-                    if (area == null)
+                    if (area == null) {
                         System.err.println("Unrecognized area started at line " + startedAt);
-                    else
+                    } else {
                         map.getAreas().add(area);
+                    }
                 }
             }
         } catch (FileNotFoundException e) {

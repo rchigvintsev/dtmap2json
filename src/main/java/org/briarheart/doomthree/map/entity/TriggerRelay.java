@@ -22,8 +22,9 @@ public class TriggerRelay extends Entity {
     @Override
     public boolean visit(AbstractMap map, boolean lastAttempt) {
         if (type == null) {
-            if (lastAttempt)
+            if (lastAttempt) {
                 System.err.println("Trigger \"" + getName() + "\" has unsupported type");
+            }
             return false;
         }
         map.getTriggers().add(this);

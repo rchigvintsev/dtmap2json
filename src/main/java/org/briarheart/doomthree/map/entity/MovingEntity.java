@@ -1,5 +1,6 @@
 package org.briarheart.doomthree.map.entity;
 
+import org.apache.commons.lang3.StringUtils;
 import org.briarheart.doomthree.map.AbstractMap;
 import org.briarheart.doomthree.map.area.Area;
 import org.briarheart.doomthree.util.Vector3;
@@ -19,20 +20,31 @@ public abstract class MovingEntity extends Entity {
     @Override
     public boolean visit(AbstractMap map, boolean lastAttempt) {
         int areaIndex = getTargetAreaIndex(map, lastAttempt);
-        if (areaIndex == -1)
+        if (areaIndex == -1) {
             return false;
+        }
 
         List<Area> areas = map.getAreas();
         Area area = areas.get(areaIndex);
-        for (Area otherArea : areas)
+        Area targetArea = null;
+        for (Area otherArea : areas) {
             if (otherArea.getBoundingBox().contains(position)) {
-                area.copy(otherArea, position);
-                areas.remove(areaIndex);
-                return true;
+                targetArea = otherArea;
+                if (StringUtils.isEmpty(map.getAreaFilter()) || map.getAreaFilter().equals(otherArea.getName())) {
+                    break;
+                }
             }
+        }
 
-        if (lastAttempt)
+        if (targetArea != null) {
+            area.copy(targetArea, position);
+            areas.remove(areaIndex);
+            return true;
+        }
+
+        if (lastAttempt) {
             System.err.println("Could not find area to accommodate another area with name \"" + area.getName() + "\"");
+        }
         return false;
     }
 
@@ -45,8 +57,9 @@ public abstract class MovingEntity extends Entity {
     protected int getTargetAreaIndex(AbstractMap map, boolean lastAttempt) {
         String areaName = getTargetAreaName();
         int areaIndex = findArea(map, areaName);
-        if (areaIndex == -1 && lastAttempt)
+        if (areaIndex == -1 && lastAttempt) {
             System.err.println("Area with name \"" + areaName + "\" is not found");
+        }
         return areaIndex;
     }
 

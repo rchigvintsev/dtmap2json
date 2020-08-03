@@ -28,11 +28,20 @@ public class Light extends Entity {
 
     @Override
     public boolean visit(AbstractMap map, boolean lastAttempt) {
-        for (Area area : map.getAreas())
+        Area targetArea = null;
+        for (Area area : map.getAreas()) {
             if (area.getBoundingBox().contains(position)) {
-                area.getLights().add(this);
-                return true;
+                targetArea = area;
+                if (StringUtils.isEmpty(map.getAreaFilter()) || map.getAreaFilter().equals(area.getName())) {
+                    break;
+                }
             }
+        }
+
+        if (targetArea != null) {
+            targetArea.getLights().add(this);
+            return true;
+        }
 
         if (StringUtils.isEmpty(map.getAreaFilter())) {
             map.getLights().add(this);

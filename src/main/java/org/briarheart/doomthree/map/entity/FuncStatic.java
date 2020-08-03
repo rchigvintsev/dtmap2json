@@ -28,30 +28,34 @@ public class FuncStatic extends MovingEntity {
     @Override
     public boolean visit(AbstractMap map, boolean lastAttempt) {
         if (lwoModel == null) {
-            if (bind == null)
+            if (bind == null) {
                 return super.visit(map, lastAttempt);
+            }
 
             // I am going to try to find model with which we should bind surfaces of area
             // with name == this.getTargetAreaName()
 
             int areaIndex = getTargetAreaIndex(map, lastAttempt);
-            if (areaIndex == -1)
+            if (areaIndex == -1) {
                 return false;
+            }
             List<Area> areas = map.getAreas();
             Area targetArea = areas.get(areaIndex);
 
             AbstractModel model = findModel(map, bind);
             if (model == null) {
-                if (lastAttempt)
+                if (lastAttempt) {
                     System.err.println("Bind model with name \"" + bind + "\" is not found");
+                }
                 return false;
             }
 
             for (Surface surface : targetArea) {
                 surface.setPosition(getPosition());
                 CollisionModel collisionModel = surface.getCollisionModel();
-                if (collisionModel != null)
+                if (collisionModel != null) {
                     collisionModel.getBody().setPosition(getPosition());
+                }
                 // TODO: Perhaps I should update bounding box of model's area here
                 model.getBoundSurfaces().add(surface);
             }
@@ -96,10 +100,13 @@ public class FuncStatic extends MovingEntity {
 
     private static AbstractModel findModel(AbstractMap map, String modelName) {
         List<Area> areas = map.getAreas();
-        for (Area area : areas)
-            for (AbstractModel model : area.getModels())
-                if (modelName.equals(model.getName()))
+        for (Area area : areas) {
+            for (AbstractModel model : area.getModels()) {
+                if (modelName.equals(model.getName())) {
                     return model;
+                }
+            }
+        }
         return null;
     }
 }
