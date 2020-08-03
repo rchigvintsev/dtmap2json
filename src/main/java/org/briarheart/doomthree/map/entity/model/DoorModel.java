@@ -11,12 +11,14 @@ public class DoorModel extends LwoModel {
     public static final Pattern MOVE_DIRECTION_PATTERN = Pattern.compile("\"movedir\"\\s+\"(\\d+)\"");
     public static final Pattern SOUND_OPEN_PATTERN = Pattern.compile("\"snd_open\"\\s+\"(\\w+)\"");
     public static final Pattern SOUND_CLOSE_PATTERN = Pattern.compile("\"snd_close\"\\s+\"(\\w+)\"");
+    public static final Pattern LOCKED_PATTERN = Pattern.compile("\"locked\"\\s+\"(\\d)\"");
 
     private String team;
     private Float time;
     private Integer moveDirection;
     private String soundOpen;
     private String soundClose;
+    private boolean locked;
 
     public DoorModel(String modelBody) {
         super(modelBody);
@@ -43,6 +45,7 @@ public class DoorModel extends LwoModel {
             json.append(",\"time\":").append(time);
         if (moveDirection != null)
             json.append(",\"moveDirection\":").append(moveDirection);
+        json.append(",\"locked\":").append(locked);
         Map<String, String> sounds = getSounds();
         if (!sounds.isEmpty()) {
             json.append(",\"sounds\":{");
@@ -66,6 +69,7 @@ public class DoorModel extends LwoModel {
         this.moveDirection = parseMoveDirection(body);
         this.soundOpen = parseSoundOpen(body);
         this.soundClose = parseSoundClose(body);
+        this.locked = parseLocked(body);
     }
 
     private String parseTeam(String body) {
@@ -101,5 +105,13 @@ public class DoorModel extends LwoModel {
         if (matcher.find())
             return matcher.group(1);
         return null;
+    }
+
+    private boolean parseLocked(String body) {
+        Matcher matcher = LOCKED_PATTERN.matcher(body);
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(1)) != 0;
+        }
+        return false;
     }
 }
