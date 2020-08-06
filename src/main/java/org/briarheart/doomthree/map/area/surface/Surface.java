@@ -2,9 +2,10 @@ package org.briarheart.doomthree.map.area.surface;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.briarheart.doomthree.map.Materials;
 import org.briarheart.doomthree.map.area.Area;
 import org.briarheart.doomthree.map.area.surface.physics.*;
+import org.briarheart.doomthree.map.material.Material;
+import org.briarheart.doomthree.map.material.Materials;
 import org.briarheart.doomthree.util.BoundingBox;
 import org.briarheart.doomthree.util.Vector2;
 import org.briarheart.doomthree.util.Vector3;
@@ -16,7 +17,7 @@ import java.util.regex.Pattern;
 
 import static java.lang.Double.parseDouble;
 import static java.lang.Integer.parseInt;
-import static org.briarheart.doomthree.map.Materials.*;
+import static org.briarheart.doomthree.map.material.Materials.*;
 
 /**
  * @author Roman Chigvintsev
@@ -29,15 +30,15 @@ public class Surface {
     private final static CollisionModelBuildingStrategy TRIMESH_STRATEGY = new TrimeshStrategy();
 
     private final Area area;
+    private final BoundingBox boundingBox = new BoundingBox();
 
     private String name;
-    private String materialName;
+    private Material material;
     private Vector3 position;
     private int numberOfVertices;
     private Vertex[] vertices;
     private Face[] faces;
     private CollisionModel collisionModel;
-    private BoundingBox boundingBox = new BoundingBox();
 
     public Surface(Area area, String surfaceBody) {
         this.area = area;
@@ -52,8 +53,12 @@ public class Surface {
         return name;
     }
 
+    public Material getMaterial() {
+        return material;
+    }
+
     public String getMaterialName() {
-        return materialName;
+        return material.getName();
     }
 
     public Vector3 getPosition() {
@@ -113,7 +118,7 @@ public class Surface {
             json.append(vertices[face.b].uv).append(",");
             json.append(vertices[face.c].uv).append("]");
         }
-        json.append("]},\"material\":\"").append(materialName).append("\"");
+        json.append("]},\"material\":").append(material.toJson());
         if (collisionModel != null)
             json.append(",\"cm\":").append(collisionModel.toJson());
         return json.append("}").toString();
@@ -129,14 +134,14 @@ public class Surface {
         }
 
         name = matcher.group(1);
-        materialName = matcher.group(2);
+        material = new Material(matcher.group(2));
         numberOfVertices = parseInt(matcher.group(3));
         MutableInt i = new MutableInt();
         parseVertices(surfaceBody, i);
         parseFaces(surfaceBody, i);
-        if (isNeedToCreateCollisionModel(materialName)) {
-            PhysicsMaterial physicsMaterial = getPhysicsMaterial(materialName);
-            CollisionModelBuildingStrategy cmBuildingStrategy = Materials.isPipe(materialName)
+        if (isNeedToCreateCollisionModel(material.getName())) {
+            PhysicsMaterial physicsMaterial = getPhysicsMaterial(material.getName());
+            CollisionModelBuildingStrategy cmBuildingStrategy = Materials.isPipe(material.getName())
                     ? TRIMESH_STRATEGY
                     : BOX_SET_STRATEGY;
             collisionModel = CollisionModel.newCollisionModel(this, physicsMaterial, cmBuildingStrategy);

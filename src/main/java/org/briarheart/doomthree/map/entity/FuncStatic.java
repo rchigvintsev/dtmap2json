@@ -17,9 +17,11 @@ import java.util.regex.Pattern;
  */
 public class FuncStatic extends MovingEntity {
     public static final Pattern BIND_PATTERN = Pattern.compile("\"bind\"\\s+\"(\\w+)\"");
+    public static final Pattern SHADER_PARM7_PATTERN = Pattern.compile("\"shaderParm7\"\\s+\"(\\w+)\"");
 
     private LwoModel lwoModel;
     private String bind;
+    private String shaderParm7;
 
     public FuncStatic(String entityBody) {
         super(entityBody);
@@ -52,6 +54,9 @@ public class FuncStatic extends MovingEntity {
 
             for (Surface surface : targetArea) {
                 surface.setPosition(getPosition());
+                if (shaderParm7 != null) {
+                    surface.getMaterial().getParameters().put("parm7", shaderParm7);
+                }
                 CollisionModel collisionModel = surface.getCollisionModel();
                 if (collisionModel != null) {
                     collisionModel.getBody().setPosition(getPosition());
@@ -91,10 +96,25 @@ public class FuncStatic extends MovingEntity {
                 this.lwoModel = new LwoModel(body);
         }
         this.bind = parseBind(body);
+        this.shaderParm7 = parseShaderParm7(body);
+    }
+
+    @Override
+    protected void beforeAreaCopy(Area from, Area to) {
+        if (shaderParm7 != null) {
+            for (Surface surface : from) {
+                surface.getMaterial().getParameters().put("parm7", shaderParm7);
+            }
+        }
     }
 
     private String parseBind(String body) {
         Matcher matcher = BIND_PATTERN.matcher(body);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    private String parseShaderParm7(String body) {
+        Matcher matcher = SHADER_PARM7_PATTERN.matcher(body);
         return matcher.find() ? matcher.group(1) : null;
     }
 

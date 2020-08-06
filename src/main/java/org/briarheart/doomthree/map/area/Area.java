@@ -2,12 +2,12 @@ package org.briarheart.doomthree.map.area;
 
 import org.apache.commons.lang3.Validate;
 import org.briarheart.doomthree.map.AbstractMap;
-import org.briarheart.doomthree.map.Materials;
 import org.briarheart.doomthree.map.area.surface.Surface;
 import org.briarheart.doomthree.map.area.surface.physics.CollisionModel;
 import org.briarheart.doomthree.map.entity.Light;
 import org.briarheart.doomthree.map.entity.Skybox;
 import org.briarheart.doomthree.map.entity.model.AbstractModel;
+import org.briarheart.doomthree.map.material.Materials;
 import org.briarheart.doomthree.util.BoundingBox;
 import org.briarheart.doomthree.util.Vector3;
 
@@ -136,7 +136,7 @@ public class Area implements Iterable<Surface> {
         return json.append("}").toString();
     }
 
-    public void copy(Area otherArea, Vector3 position) {
+    public void copyTo(Area otherArea, Vector3 position) {
         for (Surface surface : surfaces) {
             surface.setPosition(position);
             CollisionModel collisionModel = surface.getCollisionModel();

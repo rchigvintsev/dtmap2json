@@ -1,4 +1,4 @@
-package org.briarheart.doomthree.map;
+package org.briarheart.doomthree.map.material;
 
 /**
  * @author Roman Chigvintsev

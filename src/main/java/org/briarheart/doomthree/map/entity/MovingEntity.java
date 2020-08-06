@@ -37,7 +37,9 @@ public abstract class MovingEntity extends Entity {
         }
 
         if (targetArea != null) {
-            area.copy(targetArea, position);
+            beforeAreaCopy(area, targetArea);
+            area.copyTo(targetArea, position);
+            afterAreaCopy(area, targetArea);
             areas.remove(areaIndex);
             return true;
         }
@@ -80,5 +82,11 @@ public abstract class MovingEntity extends Entity {
             }
         }
         return areaIndex;
+    }
+
+    protected void beforeAreaCopy(Area from, Area to) {
+    }
+
+    protected void afterAreaCopy(Area from, Area to) {
     }
 }
