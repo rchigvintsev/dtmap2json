@@ -1,5 +1,7 @@
 package org.briarheart.doomthree.map.entity.model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -13,7 +15,7 @@ public class DoorModel extends LwoModel {
     public static final Pattern SOUND_CLOSE_PATTERN = Pattern.compile("\"snd_close\"\\s+\"(\\w+)\"");
     public static final Pattern LOCKED_PATTERN = Pattern.compile("\"locked\"\\s+\"(\\d)\"");
 
-    private String team;
+    private DoorTeam team;
     private Float time;
     private Integer moveDirection;
     private String soundOpen;
@@ -22,6 +24,10 @@ public class DoorModel extends LwoModel {
 
     public DoorModel(String modelBody) {
         super(modelBody);
+    }
+
+    public boolean isLocked() {
+        return team != null ? team.isLocked() : locked;
     }
 
     @Override
@@ -39,13 +45,16 @@ public class DoorModel extends LwoModel {
     @Override
     protected void writeAttributes(StringBuilder json) {
         super.writeAttributes(json);
-        if (team != null)
-            json.append(",\"team\":\"").append(team).append("\"");
-        if (time != null)
+        if (team != null) {
+            json.append(",\"team\":\"").append(team.getName()).append("\"");
+        }
+        if (time != null) {
             json.append(",\"time\":").append(time);
-        if (moveDirection != null)
+        }
+        if (moveDirection != null) {
             json.append(",\"moveDirection\":").append(moveDirection);
-        json.append(",\"locked\":").append(locked);
+        }
+        json.append(",\"locked\":").append(isLocked());
         Map<String, String> sounds = getSounds();
         if (!sounds.isEmpty()) {
             json.append(",\"sounds\":{");
@@ -64,12 +73,18 @@ public class DoorModel extends LwoModel {
     @Override
     protected void parse(String body) {
         super.parse(body);
-        this.team = parseTeam(body);
+
         this.time = parseTime(body);
         this.moveDirection = parseMoveDirection(body);
         this.soundOpen = parseSoundOpen(body);
         this.soundClose = parseSoundClose(body);
         this.locked = parseLocked(body);
+
+        String team = parseTeam(body);
+        if (!StringUtils.isEmpty(team)) {
+            this.team = DoorTeam.getInstance(team);
+            this.team.setLocked(this.locked);
+        }
     }
 
     private String parseTeam(String body) {
