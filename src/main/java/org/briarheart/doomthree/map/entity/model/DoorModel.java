@@ -32,13 +32,14 @@ public class DoorModel extends LwoModel {
 
     @Override
     public Map<String, String> getSounds() {
-        if (soundOpen == null && soundClose == null)
-            return super.getSounds();
         Map<String, String> sounds = new HashMap<>();
-        if (soundOpen != null)
+        sounds.put("locked", "default_door_locked");
+        if (soundOpen != null) {
             sounds.put("open", soundOpen);
-        if (soundClose != null)
+        }
+        if (soundClose != null) {
             sounds.put("close", soundClose);
+        }
         return sounds;
     }
 
@@ -60,8 +61,9 @@ public class DoorModel extends LwoModel {
             json.append(",\"sounds\":{");
             int i = 0;
             for (Map.Entry<String, String> soundEntry : sounds.entrySet()) {
-                if (i > 0)
+                if (i > 0) {
                     json.append(",");
+                }
                 json.append("\"").append(soundEntry.getKey()).append("\":");
                 json.append("\"").append(soundEntry.getValue()).append("\"");
                 i++;
