@@ -27,32 +27,31 @@ public class Main {
         }
 
         String baseDir = args[0];
-        if (baseDir.endsWith("/"))
+        if (baseDir.endsWith("/")) {
             baseDir = baseDir.substring(0, baseDir.length() - 1);
+        }
 
         String mapName = args[1];
 
         String area = null;
-        if (args.length > 2)
+        if (args.length > 2) {
             area = args[2];
+        }
 
         AbstractMap map = MapFactory.createMap(mapName, area);
-
+        map.preProcess();
         readDefs(baseDir, map);
         readAreas(baseDir, map);
         readEntities(baseDir, map);
-
-        map.applyFilter();
-        map.updateMapMeta();
+        map.postProcess();
 
         String mapJson = map.toJson();
         String mapMetaJson = map.getMeta().toJson();
 
-        System.out.println(mapJson);
-        System.out.println(mapMetaJson);
-
         Files.write(new File(baseDir + "/maps/" + mapName + ".json").toPath(), mapJson.getBytes());
         Files.write(new File(baseDir + "/maps/" + mapName + ".meta.json").toPath(), mapMetaJson.getBytes());
+
+        System.out.println("Done");
     }
 
     private static void readEntities(String baseDir, AbstractMap map) {

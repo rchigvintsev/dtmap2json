@@ -21,6 +21,7 @@ public class Light extends Entity {
     private Vector3 position;
     private String color;
     private int distance;
+    private boolean castShadow;
 
     public Light(String entityBody) {
         super(entityBody);
@@ -39,12 +40,12 @@ public class Light extends Entity {
         }
 
         if (targetArea != null) {
-            targetArea.getLights().add(this);
+            targetArea.addLight(this);
             return true;
         }
 
         if (StringUtils.isEmpty(map.getAreaFilter())) {
-            map.getLights().add(this);
+            map.addLight(this);
             return true;
         }
 
@@ -59,12 +60,21 @@ public class Light extends Entity {
         this.position = position;
     }
 
+    public boolean isCastShadow() {
+        return castShadow;
+    }
+
+    public void setCastShadow(boolean castShadow) {
+        this.castShadow = castShadow;
+    }
+
     @Override
     public String toJson() {
         String json = "{\"name\":\"" + getName() + "\",\"type\":\"" + type + "\",\"position\":" + position;
-        if (color != null)
+        if (color != null) {
             json += ",\"color\":\"" + color + "\"";
-        return json + ",\"distance\":" + distance + "}";
+        }
+        return json + ",\"distance\":" + distance + ",\"castShadow\":" + castShadow + "}";
     }
 
     @Override

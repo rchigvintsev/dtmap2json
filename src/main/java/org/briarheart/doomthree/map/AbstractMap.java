@@ -32,6 +32,15 @@ public abstract class AbstractMap {
         this.meta = new Meta(name);
     }
 
+    public void preProcess() {
+        // Override in subclasses
+    }
+
+    public void postProcess() {
+        applyFilter();
+        updateMapMeta();
+    }
+
     public Meta getMeta() {
         return meta;
     }
@@ -50,10 +59,6 @@ public abstract class AbstractMap {
 
     public List<Area> getAreas() {
         return areas;
-    }
-
-    public List<Light> getLights() {
-        return lights;
     }
 
     public List<TriggerRelay> getTriggers() {
@@ -80,6 +85,10 @@ public abstract class AbstractMap {
         return entity.visit(this, lastAttempt);
     }
 
+    public void addLight(Light light) {
+        lights.add(light);
+    }
+
     public Md5ModelDef newMd5ModelDef(String body) {
         return new Md5ModelDef(body);
     }
@@ -90,26 +99,6 @@ public abstract class AbstractMap {
 
     public Surface newSurface(Area area, String surfaceBody) {
         return new Surface(area, surfaceBody);
-    }
-
-    public void applyFilter() {
-        if (!StringUtils.isEmpty(areaFilter)) {
-            for (int i = 0; i < areas.size(); i++) {
-                Area area = areas.get(i);
-                if (area.getName().equals(areaFilter)) {
-                    areas.clear();
-                    areas.add(area);
-                    return;
-                }
-            }
-        }
-    }
-
-    public void updateMapMeta() {
-        for (Area area : areas)
-            area.updateMapMeta(meta);
-        if (skybox != null)
-            skybox.updateMapMeta(meta);
     }
 
     public String toJson() {
@@ -164,6 +153,26 @@ public abstract class AbstractMap {
     @Override
     public String toString() {
         return toJson();
+    }
+
+    protected void applyFilter() {
+        if (!StringUtils.isEmpty(areaFilter)) {
+            for (int i = 0; i < areas.size(); i++) {
+                Area area = areas.get(i);
+                if (area.getName().equals(areaFilter)) {
+                    areas.clear();
+                    areas.add(area);
+                    return;
+                }
+            }
+        }
+    }
+
+    protected void updateMapMeta() {
+        for (Area area : areas)
+            area.updateMapMeta(meta);
+        if (skybox != null)
+            skybox.updateMapMeta(meta);
     }
 
     public static class Meta {

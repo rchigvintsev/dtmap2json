@@ -63,10 +63,6 @@ public class Area implements Iterable<Surface> {
         return models;
     }
 
-    public List<Light> getLights() {
-        return lights;
-    }
-
     public void addSurface(Surface surface) {
         this.surfaces.add(surface);
         this.numberOfSurfaces += 1;
@@ -75,6 +71,10 @@ public class Area implements Iterable<Surface> {
 
     public void addModel(AbstractModel model) {
         this.models.add(model);
+    }
+
+    public void addLight(Light light) {
+        lights.add(light);
     }
 
     public void updateMapMeta(AbstractMap.Meta meta) {
@@ -152,7 +152,7 @@ public class Area implements Iterable<Surface> {
 
         for (Light light : lights) {
             light.setPosition(position);
-            otherArea.getLights().add(light);
+            otherArea.addLight(light);
         }
     }
 
