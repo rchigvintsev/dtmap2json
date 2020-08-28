@@ -2,5 +2,13 @@
   {
     "name": "light_1778",
     "castShadow": true
+  },
+  {
+    "name": "light_3342",
+    "castShadow": true
+  },
+  {
+    "name": "light_1786",
+    "castShadow": true
   }
 ]
