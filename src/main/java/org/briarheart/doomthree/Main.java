@@ -85,9 +85,10 @@ public class Main {
             e.printStackTrace();
         }
 
-        for (Entity entity : pendingEntities)
+        for (Entity entity : pendingEntities) {
             // It's a last chance for entity to be placed in map
             map.addEntity(entity, true);
+        }
     }
 
     private static Entity readNextEntity(Scanner scanner, MutableInt lineNumber, AbstractMap map) {

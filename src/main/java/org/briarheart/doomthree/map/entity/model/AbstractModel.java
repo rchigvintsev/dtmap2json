@@ -1,6 +1,5 @@
 package org.briarheart.doomthree.map.entity.model;
 
-import org.apache.commons.lang3.StringUtils;
 import org.briarheart.doomthree.map.AbstractMap;
 import org.briarheart.doomthree.map.area.Area;
 import org.briarheart.doomthree.map.area.surface.Surface;
@@ -60,9 +59,9 @@ public abstract class AbstractModel extends Entity {
     protected Area findTargetArea(AbstractMap map) {
         Area targetArea = null;
         for (Area area : map.getAreas()) {
-            if (area.getBoundingBox().contains(getPosition())) {
+            if (area.containsPoint(getPosition())) {
                 targetArea = area;
-                if (StringUtils.isEmpty(map.getAreaFilter()) || map.getAreaFilter().equals(area.getName())) {
+                if (map.matchesAreaFilter(area.getName())) {
                     break;
                 }
             }

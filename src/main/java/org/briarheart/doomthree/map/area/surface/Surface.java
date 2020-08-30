@@ -6,7 +6,6 @@ import org.briarheart.doomthree.map.area.Area;
 import org.briarheart.doomthree.map.area.surface.physics.*;
 import org.briarheart.doomthree.map.material.Material;
 import org.briarheart.doomthree.map.material.Materials;
-import org.briarheart.doomthree.util.BoundingBox;
 import org.briarheart.doomthree.util.Vector2;
 import org.briarheart.doomthree.util.Vector3;
 
@@ -30,7 +29,6 @@ public class Surface {
     private final static CollisionModelBuildingStrategy TRIMESH_STRATEGY = new TrimeshStrategy();
 
     private final Area area;
-    private final BoundingBox boundingBox = new BoundingBox();
 
     private String name;
     private Material material;
@@ -67,7 +65,6 @@ public class Surface {
 
     public void setPosition(Vector3 position) {
         this.position = position;
-        this.boundingBox.add(position);
     }
 
     public Vertex[] getVertices() {
@@ -80,10 +77,6 @@ public class Surface {
 
     public CollisionModel getCollisionModel() {
         return collisionModel;
-    }
-
-    public BoundingBox getBoundingBox() {
-        return boundingBox;
     }
 
     @Override
@@ -173,7 +166,6 @@ public class Surface {
                         Vector3 normal = new Vector3(parseDouble(vertexComponents[6]), parseDouble(vertexComponents[7]),
                                 parseDouble(vertexComponents[5]));
                         vertices[vertexIndex++] = new Vertex(position, uv, normal);
-                        boundingBox.checkBoundaries(position);
                     }
                 }
             } else

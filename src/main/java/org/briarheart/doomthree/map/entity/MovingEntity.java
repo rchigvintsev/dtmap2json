@@ -1,6 +1,5 @@
 package org.briarheart.doomthree.map.entity;
 
-import org.apache.commons.lang3.StringUtils;
 import org.briarheart.doomthree.map.AbstractMap;
 import org.briarheart.doomthree.map.area.Area;
 import org.briarheart.doomthree.util.Vector3;
@@ -28,9 +27,9 @@ public abstract class MovingEntity extends Entity {
         Area area = areas.get(areaIndex);
         Area targetArea = null;
         for (Area otherArea : areas) {
-            if (otherArea.getBoundingBox().contains(position)) {
+            if (otherArea.containsPoint(position)) {
                 targetArea = otherArea;
-                if (StringUtils.isEmpty(map.getAreaFilter()) || map.getAreaFilter().equals(otherArea.getName())) {
+                if (map.matchesAreaFilter(otherArea.getName())) {
                     break;
                 }
             }

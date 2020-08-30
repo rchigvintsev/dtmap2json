@@ -11,10 +11,7 @@ import org.briarheart.doomthree.map.material.Materials;
 import org.briarheart.doomthree.util.BoundingBox;
 import org.briarheart.doomthree.util.Vector3;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,7 +24,6 @@ public class Area implements Iterable<Surface> {
     private static final Pattern SURFACE_HEADER_PATTERN = Pattern
             .compile("/\\* surface \\d+ \\*/ \\{ \"([\\w/]+)\"");
 
-    private final BoundingBox boundingBox = new BoundingBox();
     private final List<Surface> surfaces = new ArrayList<>();
     private final List<Light> lights = new ArrayList<>();
     private final List<AbstractModel> models = new ArrayList<>();
@@ -37,6 +33,7 @@ public class Area implements Iterable<Surface> {
     private String name;
     private Vector3 position;
     private int numberOfSurfaces;
+    private List<BoundingBox> boundingBoxes = Collections.emptyList();
 
     public Area(AbstractMap map, String areaBody) {
         this.map = map;
@@ -55,8 +52,12 @@ public class Area implements Iterable<Surface> {
         this.position = position;
     }
 
-    public BoundingBox getBoundingBox() {
-        return boundingBox;
+    public List<BoundingBox> getBoundingBoxes() {
+        return boundingBoxes;
+    }
+
+    public void setBoundingBoxes(List<BoundingBox> boundingBoxes) {
+        this.boundingBoxes = boundingBoxes;
     }
 
     public List<AbstractModel> getModels() {
@@ -66,7 +67,6 @@ public class Area implements Iterable<Surface> {
     public void addSurface(Surface surface) {
         this.surfaces.add(surface);
         this.numberOfSurfaces += 1;
-        updateBoundingBox(surface);
     }
 
     public void addModel(AbstractModel model) {
@@ -104,7 +104,15 @@ public class Area implements Iterable<Surface> {
         json.append("\"name\":\"").append(name).append("\",");
         if (position != null)
             json.append("\"position\":").append(position).append(",");
-        json.append("\"boundingBox\":").append(boundingBox).append(",");
+        json.append("\"boundingBoxes\":[");
+        for (int i = 0; i < boundingBoxes.size(); i++) {
+            BoundingBox boundingBox = boundingBoxes.get(i);
+            if (i > 0) {
+                json.append(",");
+            }
+            json.append(boundingBox);
+        }
+        json.append("],");
         json.append("\"surfaces\":[");
         for (int i = 0; i < surfaces.size(); i++) {
             Surface surface = surfaces.get(i);
@@ -156,6 +164,15 @@ public class Area implements Iterable<Surface> {
         }
     }
 
+    public boolean containsPoint(Vector3 point) {
+        for (BoundingBox boundingBox : boundingBoxes) {
+            if (boundingBox.contains(point)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected void parse(String areaBody) {
         Validate.notEmpty(areaBody, "Area body cannot be empty");
 
@@ -181,7 +198,6 @@ public class Area implements Iterable<Surface> {
                             new Skybox(surface.getMaterialName()).visit(this.map, true);
                         else {
                             this.surfaces.add(surface);
-                            updateBoundingBox(surface);
                         }
                     }
                 }
@@ -205,10 +221,6 @@ public class Area implements Iterable<Surface> {
         } else
             System.err.println("Failed to parse surface material in area \"" + this.name + "\"");
         return null;
-    }
-
-    private void updateBoundingBox(Surface surface) {
-        boundingBox.checkBoundaries(surface.getBoundingBox());
     }
 
     private void checkNumberOfSurfaces() {

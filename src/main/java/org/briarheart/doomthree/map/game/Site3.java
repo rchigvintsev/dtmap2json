@@ -8,6 +8,7 @@ import org.briarheart.doomthree.map.entity.InfoPlayerStart;
 import org.briarheart.doomthree.map.entity.Light;
 import org.briarheart.doomthree.map.util.Entities;
 import org.briarheart.doomthree.util.Angles;
+import org.briarheart.doomthree.util.BoundingBox;
 import org.briarheart.doomthree.util.Vector3;
 
 import java.io.IOException;
@@ -15,7 +16,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,10 +28,12 @@ public class Site3 extends AbstractMap {
     public static final String NAME = "game/site3";
 
     private final Map<String, Map<String, Object>> overriddenLightProperties;
+    private final Map<String, List<BoundingBox>> boundingBoxes;
 
     public Site3(String areaFilter) {
         super(NAME, areaFilter);
         this.overriddenLightProperties = loadOverriddenLightProperties();
+        this.boundingBoxes = loadBoundingBoxes();
     }
 
     @Override
@@ -38,7 +43,12 @@ public class Site3 extends AbstractMap {
 
     @Override
     public Area newArea(String body) {
-        return new Site3Area(this, body, overriddenLightProperties);
+        Site3Area area = new Site3Area(this, body, overriddenLightProperties);
+        List<BoundingBox> boundingBoxes = this.boundingBoxes.get(area.getName());
+        if (boundingBoxes != null) {
+            area.setBoundingBoxes(boundingBoxes);
+        }
+        return area;
     }
 
     @Override
@@ -79,6 +89,39 @@ public class Site3 extends AbstractMap {
                 }
             } catch (IOException | URISyntaxException e) {
                 throw new RuntimeException("Failed to load overridden light definitions", e);
+            }
+        }
+        return result;
+    }
+
+    private Map<String, List<BoundingBox>> loadBoundingBoxes() {
+        Map<String, List<BoundingBox>> result = new HashMap<>();
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL boundingBoxesUrl = classLoader.getResource("map/game/site3/bounding-boxes.json");
+        if (boundingBoxesUrl != null) {
+            try {
+                String json = new String(Files.readAllBytes(Paths.get(boundingBoxesUrl.toURI())));
+                JsonObject boundingBoxes = JsonParser.parseString(json).getAsJsonObject();
+                for (Map.Entry<String, JsonElement> bbElement : boundingBoxes.entrySet()) {
+                    result.put(bbElement.getKey(), new ArrayList<>());
+                    JsonArray bbArray = bbElement.getValue().getAsJsonArray();
+                    for (JsonElement bbValueElement : bbArray) {
+                        JsonArray bbValueArray = bbValueElement.getAsJsonArray();
+
+                        double minX = bbValueArray.get(0).getAsDouble();
+                        double maxX = bbValueArray.get(1).getAsDouble();
+
+                        double minY = bbValueArray.get(2).getAsDouble();
+                        double maxY = bbValueArray.get(3).getAsDouble();
+
+                        double minZ = bbValueArray.get(4).getAsDouble();
+                        double maxZ = bbValueArray.get(5).getAsDouble();
+
+                        result.get(bbElement.getKey()).add(new BoundingBox(minX, maxX, minY, maxY, minZ, maxZ));
+                    }
+                }
+            } catch (IOException | URISyntaxException e) {
+                throw new RuntimeException("Failed to load bounding box definitions", e);
             }
         }
         return result;

@@ -7,26 +7,29 @@ import org.apache.commons.math3.util.Precision;
  */
 public class BoundingBox {
     private static final double ERROR = 1.0;
-    private static final double RANGE_ERROR = 20.0;
+    private static final double RANGE_ERROR = 5.0;
 
     private Double minX, maxX;
     private Double minY, maxY;
     private Double minZ, maxZ;
 
+    public BoundingBox() {
+        this(null, null, null, null, null, null);
+    }
+
+    public BoundingBox(Double minX, Double maxX, Double minY, Double maxY, Double minZ, Double maxZ) {
+        this.minX = minX;
+        this.maxX = maxX;
+        this.minY = minY;
+        this.maxY = maxY;
+        this.minZ = minZ;
+        this.maxZ = maxZ;
+    }
+
     public boolean contains(Vector3 point) {
         return checkRange(minX, maxX, point.x)
                 && checkRange(minY, maxY, point.y)
                 && checkRange(minZ, maxZ, point.z);
-    }
-
-    public boolean contains(BoundingBox other) {
-        if (other.minX < minX || other.maxX > maxX)
-            return false;
-        if (other.minY < minY || other.maxY > maxY)
-            return false;
-        if (other.minZ < minZ || other.maxZ > maxZ)
-            return false;
-        return true;
     }
 
     public boolean overlaps(BoundingBox other) {
@@ -60,21 +63,6 @@ public class BoundingBox {
             minZ = point.z;
         if (maxZ == null || point.z > maxZ)
             maxZ = point.z;
-    }
-
-    public void checkBoundaries(BoundingBox boundingBox) {
-        if (boundingBox.minX != null && (minX == null || boundingBox.minX < minX))
-            minX = boundingBox.minX;
-        if (boundingBox.maxX != null && (maxX == null || boundingBox.maxX > maxX))
-            maxX = boundingBox.maxX;
-        if (boundingBox.minY != null && (minY == null || boundingBox.minY < minY))
-            minY = boundingBox.minY;
-        if (boundingBox.maxY != null && (maxY == null || boundingBox.maxY > maxY))
-            maxY = boundingBox.maxY;
-        if (boundingBox.minZ != null && (minZ == null || boundingBox.minZ < minZ))
-            minZ = boundingBox.minZ;
-        if (boundingBox.maxZ != null && (maxZ == null || boundingBox.maxZ > maxZ))
-            maxZ = boundingBox.maxZ;
     }
 
     public void add(Vector3 v) {

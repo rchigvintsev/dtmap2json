@@ -31,9 +31,9 @@ public class Light extends Entity {
     public boolean visit(AbstractMap map, boolean lastAttempt) {
         Area targetArea = null;
         for (Area area : map.getAreas()) {
-            if (area.getBoundingBox().contains(position)) {
+            if (area.containsPoint(position)) {
                 targetArea = area;
-                if (StringUtils.isEmpty(map.getAreaFilter()) || map.getAreaFilter().equals(area.getName())) {
+                if (map.matchesAreaFilter(area.getName())) {
                     break;
                 }
             }

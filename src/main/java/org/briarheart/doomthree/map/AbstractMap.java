@@ -53,6 +53,10 @@ public abstract class AbstractMap {
         return areaFilter;
     }
 
+    public boolean matchesAreaFilter(String areaName) {
+        return StringUtils.isEmpty(areaFilter) || areaFilter.equals(areaName);
+    }
+
     public List<Md5ModelDef> getMd5ModelDefs() {
         return md5ModelDefs;
     }
