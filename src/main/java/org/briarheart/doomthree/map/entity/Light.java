@@ -14,11 +14,13 @@ import java.util.regex.Pattern;
 public class Light extends Entity {
     private static final Pattern COLOR_PATTERN = Pattern.compile("\"_color\"\\s+\"([0-9 .]+)\"");
     private static final Pattern LIGHT_RADIUS_PATTERN = Pattern.compile("\"light_radius\"\\s+\"([0-9 .]+)\"");
+    private static final Pattern LIGHT_CENTER_PATTERN = Pattern.compile("\"light_center\"\\s+\"([0-9 .-]+)\"");
 
-    private static final double DISTANCE_FACTOR = 2.0d;
+    private static final double DISTANCE_FACTOR = 1.8d;
 
     private String type = "point";
     private Vector3 position;
+    private Vector3 center;
     private String color;
     private int distance;
     private boolean castShadow;
@@ -60,6 +62,10 @@ public class Light extends Entity {
         this.position = position;
     }
 
+    public Vector3 getCenter() {
+        return center;
+    }
+
     public boolean isCastShadow() {
         return castShadow;
     }
@@ -74,7 +80,11 @@ public class Light extends Entity {
         if (color != null) {
             json += ",\"color\":\"" + color + "\"";
         }
-        return json + ",\"distance\":" + distance + ",\"castShadow\":" + castShadow + "}";
+        json += ",\"distance\":" + distance + ",\"castShadow\":" + castShadow;
+        if (center != null && !center.isZero()) {
+            json += ",\"center\":" + center;
+        }
+        return json + "}";
     }
 
     @Override
@@ -84,6 +94,10 @@ public class Light extends Entity {
         color = parseColor(body);
         Vector3 lightRadius = parseLightRadius(body);
         distance = (int) (getMaxRadius(lightRadius) * DISTANCE_FACTOR);
+        Vector3 center = parseLightCenter(body);
+        if (center != null) {
+            this.center = position.add(center);
+        }
     }
 
     protected String parseColor(String s) {
@@ -99,7 +113,6 @@ public class Light extends Entity {
             }
             return color.toString();
         }
-        System.err.println("Failed to parse light color");
         return null;
     }
 
@@ -114,5 +127,13 @@ public class Light extends Entity {
     private double getMaxRadius(Vector3 lightRadius) {
         double max = Double.compare(lightRadius.x, lightRadius.y) > 0 ? lightRadius.x : lightRadius.y;
         return Double.compare(max, lightRadius.z) > 0 ? lightRadius.x : lightRadius.y;
+    }
+
+    protected Vector3 parseLightCenter(String s) {
+        Matcher matcher = LIGHT_CENTER_PATTERN.matcher(s);
+        if (matcher.find()) {
+            return Vector3.fromString(matcher.group(1));
+        }
+        return null;
     }
 }

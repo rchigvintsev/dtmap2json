@@ -114,6 +114,10 @@ public class Vector3 {
         return new Vector3(vector).multiplyScalar(scalar);
     }
 
+    public boolean isZero() {
+        return Double.compare(x, 0.0d) == 0 && Double.compare(y, 0.0d) == 0 && Double.compare(z, 0.0d) == 0;
+    }
+
     @Override
     public String toString() {
         return toJson();
